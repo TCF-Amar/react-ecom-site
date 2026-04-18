@@ -21,6 +21,7 @@
     "react-range": "^1.10.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.14.1",
+    "redux-persist": "^6.0.0",
     "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
@@ -28,6 +29,7 @@
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@types/redux-persist": "^4.0.0",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",

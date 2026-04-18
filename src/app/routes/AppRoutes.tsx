@@ -1,11 +1,12 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
-import LoginPage from "../../features/auth/pages/LoginPage";
+import AuthPage from "../../features/auth/pages/AuthPage";
 import HomePage from "../../features/home/pages/HomePage";
 import ProductPage from "../../features/product/page/ProductPage";
 import CategoriesPage from "../../features/product/page/CategoriesPage";
+import ProductDetail from "../../features/product/page/ProductDetail";
 
 function AppRoutes() {
   return (
@@ -17,21 +18,21 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route path="/" element={<HomePage/>} />
-        <Route path="/collections" element={<ProductPage/>} />
-        <Route path="/categories" element={<CategoriesPage/>} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/collections" element={<ProductPage />} />
+        <Route path="/categories" element={<CategoriesPage />} />
+        <Route path="/categories/:cat" element={<CategoriesPage />} />
+        <Route path="/collections/product/:slug" element={<ProductDetail />} />
+        <Route path="/categories/product/:slug" element={<ProductDetail />} />
       </Route>
       <Route
         path="/auth"
         element={
           <PublicRoute>
-            <LoginPage />
+            <AuthPage />
           </PublicRoute>
         }
-      >
-      </Route>
-
-      <Route path="*" element={<Navigate to="/" replace />} />
+      ></Route>
     </Routes>
   );
 }

@@ -5,14 +5,13 @@ import Header from "../shared/components/Header";
 
 function MainLayout() {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
-     <TopBar/>
-     <Header/>
-      <main className="">
-      {/* lorem3000 */}
+    <div className="min flex flex-col bg-slate-50 font-sans text-slate-900 ">
+      <TopBar />
+      <Header />
+      <main className="m-auto flex flex-col w-full px-4 py-8 md:w-[70vw] justify-start h-full ">
         <Outlet />
       </main>
-      <footer></footer>
+      <footer className="-100"></footer>
     </div>
   );
 }

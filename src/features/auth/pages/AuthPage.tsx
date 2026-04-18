@@ -3,7 +3,7 @@ import LoginComponent from "../components/LoginComponent";
 import RegisterComponent from "../components/RegisterComponent";
 import { useSearchParams } from "react-router-dom";
 
-function LoginPage() {
+function AuthPage() {
   const [params, setParams] = useSearchParams();
   const mode = params.get("mode") || "sign-in";
     const [showPassword, setShowPassword] = useState(false);
@@ -50,4 +50,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default AuthPage;
