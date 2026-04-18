@@ -7,28 +7,32 @@ import ProductCard from "../components/ProductCard";
 import ProductCardSkeleton from "../../../shared/components/Loader/ProductCardSkeleton";
 
 const CategoriesPage: React.FC = () => {
-  const { categories, fetchProductsByCat, catProducts, catLoading } =
-    useProduct();
+  const {
+    categories,
+    fetchProductsByCat,
+    catProducts,
+    catLoading,
+    allProducts: products,
+  } = useProduct();
   const location = useLocation();
 
   const navigate = useNavigate();
   const [currentCategory, setCurrentCategory] = useState<string | any>(null);
+
   useEffect(() => {
     fetchProductsByCat(currentCategory);
   }, [currentCategory]);
-
 
   useEffect(() => {
     const slug = location.pathname.split("/").findLast(Boolean) || "";
     setCurrentCategory(slug === "categories" ? "" : slug);
   }, [location.pathname]);
 
-
   const handelSelectCurrenCat = (value: string) => {
     setCurrentCategory(value);
     navigate(`/categories/${value}`);
   };
-
+  const listProduct = !currentCategory ? products : catProducts;
   return (
     <>
       <Breadcrumb />
@@ -99,8 +103,8 @@ const CategoriesPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {catProducts!.length > 0 ? (
-              catProducts?.map((p) => <ProductCard key={p.id} product={p} />)
+            {listProduct!.length > 0 ? (
+              listProduct?.map((p) => <ProductCard key={p.id} product={p} />)
             ) : (
               <div className="flex justify-center items-center h-10 w-full  col-span-6">
                 <p>Product not found</p>

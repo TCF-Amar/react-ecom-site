@@ -1,5 +1,6 @@
 
 import axios from "axios";
+import { env } from "../config/env";
 
 
 export const contentType = {
@@ -7,7 +8,7 @@ export const contentType = {
     multipartFormData:"multipart/form-data"
 }
 const axiosInstance = axios.create({
-    baseURL: "https://api.escuelajs.co/api/v1/",
+    baseURL: env.baseUrl,
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",

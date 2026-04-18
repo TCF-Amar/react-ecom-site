@@ -10,10 +10,20 @@ export const fetchProductByCategory = async (categorySlug: string) => {
     }
 }
 
-export const fetchProductBySlug = async (slug: string) => {
+export const fetchProductBySlug = async (slug: string | null) => {
     try {
 
         const res = await axiosInstance.get(`products/slug/${slug}`);
+        return res.data
+    } catch (error: any) {
+        throw new Error(error.message || "Something went wrong fetch products")
+
+    }
+}
+export const fetchRelatedProduct = async (slug: string | null) => {
+    try {
+
+        const res = await axiosInstance.get(`products/slug/${slug}/related`);
         return res.data
     } catch (error: any) {
         throw new Error(error.message || "Something went wrong fetch products")

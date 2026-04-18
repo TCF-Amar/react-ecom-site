@@ -16,7 +16,7 @@ const Header: React.FC = () => {
 
   const navList: string[] = [
     "Home",
-    "Collections",
+    "Products",
     "Categories",
     "Deals",
     "Contact",
@@ -26,7 +26,7 @@ const Header: React.FC = () => {
 
   return (
     <header
-      className={`sticky top-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-xl py-3`}
+      className={`sticky top-0 w-full z-50 transition-all duration-300 bg-white py-3`}
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center gap-8">
         <Link
@@ -73,12 +73,12 @@ const Header: React.FC = () => {
 
               <span className="absolute top-1 right-1 w-2 h-2 bg-indigo-600 border-2 border-white shadow-sm" />
             </button>
-            <div className="relative text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer group">
+            <Link to={"/cart"} className="relative text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer group">
               <FiShoppingCart size={22} />
               <span className="absolute -top-3 -right-3 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 shadow-lg ring-4 ring-white transition-transform group-hover:scale-110">
                 3
               </span>
-            </div>
+            </Link>
           </div>
 
           <div className="h-8 w-px bg-slate-200 hidden md:block" />

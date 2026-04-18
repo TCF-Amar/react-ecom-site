@@ -13,8 +13,6 @@ import { auth } from "../../../config/firebaseConfigure";
 
 
 
-
-
 export const useAuth = () => {
     const [state, setState] = useState<AuthState>({
         firebaseUser: null,
@@ -59,7 +57,7 @@ export const useAuth = () => {
     }, [state.error]);
 
 
-    const withLoading = useCallback(async (fn: () => Promise<void>) => {
+    const myFun = useCallback(async (fn: () => Promise<void>) => {
         setState(prev => ({ ...prev, loading: true, error: null }));
         try {
             await fn();
@@ -70,30 +68,24 @@ export const useAuth = () => {
         }
     }, []);
 
-    const signInUser = useCallback(
-        (userData: LoginRequest) =>
-            withLoading(() => signInService(userData.email, userData.password)),
-        [withLoading]
-    );
+    const signInUser = (userData: LoginRequest) =>
+        myFun(() => signInService(userData.email, userData.password))
 
-    const signUpUser = useCallback(
-        (userData: RegisterRequest) =>
-            withLoading(() =>
-                signUpService(userData.email, userData.password, userData.username)
-            ),
-        [withLoading]
-    );
 
-    const signOutUser = useCallback(
-        () => withLoading(() => signOutService()),
-        [withLoading]
-    );
+
+    const signUpUser = (userData: RegisterRequest) =>
+        myFun(() =>
+            signUpService(userData.email, userData.password, userData.username)
+        )
+
+
+    const signOutUser = () => myFun(() => signOutService())
+
 
 
 
 
     return {
-        // user: state.firebaseUser,
         user: state.userData,
         isAuthenticated: !!state.firebaseUser,
         loading: state.loading,

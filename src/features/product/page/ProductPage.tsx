@@ -1,12 +1,62 @@
+import { useEffect, useState } from "react";
 import Breadcrumb from "../../../shared/components/Breadcrumb";
 import ProductCardSkeleton from "../../../shared/components/Loader/ProductCardSkeleton";
 import ProductCard from "../components/ProductCard";
 import { useProduct } from "../hook/useProduct";
+import type { Product } from "../types";
+import { FiFilter } from "react-icons/fi";
 
 function ProductPage() {
-  const { loading, allProducts } = useProduct();
-  
+  const { loading, allProducts, categories } = useProduct();
 
+  const [currentCategories, setCurrentCategories] = useState<string[]>([]);
+  const [sortOption, setSortOption] = useState<string | null>(null);
+  const [listProducts, setListProducts] = useState<Product[]>([]);
+
+  // for mobile
+  const [showFilter, setShowFilter] = useState(false);
+
+  console.log(currentCategories);
+  const handelSelectCat = (e: HTMLInputElement) => {
+    const { value, checked } = e;
+    setCurrentCategories((prev) =>
+      checked ? [...prev, value] : prev.filter((c) => c !== value),
+    );
+  };
+
+  const filterProducts = () => {
+    let filtered = [...allProducts];
+
+    if (currentCategories.length > 0) {
+      filtered = filtered.filter((p) =>
+        currentCategories.includes(p.category?.slug ?? ""),
+      );
+    }
+
+    switch (sortOption) {
+      case "lth":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "htl":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case "nf":
+        filtered.sort(
+          (a, b) =>
+            new Date(b.creationAt).getTime() - new Date(a.creationAt).getTime(),
+        );
+        break;
+      case "rlt":
+      default:
+        break;
+    }
+
+    setListProducts(filtered);
+  };
+
+  useEffect(() => {
+    filterProducts();
+  }, [sortOption, allProducts, currentCategories]);
   return (
     <>
       <Breadcrumb />
@@ -22,25 +72,134 @@ function ProductPage() {
           dolor eum nihil?
         </p>
       </div>
-      <div className="py-8">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          {allProducts!.length > 0 ? (
-            allProducts?.map((p, index) => <ProductCard key={index} product={p}  />)
-          ) : (
-            <div className="flex justify-center items-center h-10 w-full  col-span-6">
-              <p>Product not found</p>
+      <div className="py-8 flex flex-col md:flex-row  gap-4 relative">
+        <div className=" hidden md:flex flex-col gap-4 flex-1  relative top-0 ">
+          <div className="sticky top-20">
+            <div className="flex justify-between ">
+              <p className="uppercase font-bold py-4 s">Filters</p>
+              {currentCategories.length > 0 && (
+                <button type="button" onClick={() => setCurrentCategories([]) }>
+                  <p className="text-red-500 font-semibold cursor-pointer">
+                    Clear Filters
+                  </p>
+                </button>
+              )}
+            </div>
+            <div className="border border-black/40 flex flex-col p-4">
+              <p className="uppercase font-semibold pb-4">Categories</p>
+              {categories?.map((cat, idx) => (
+                <div key={idx} className="flex gap-3">
+                  <input
+                    type="checkbox"
+                    value={cat.slug}
+                    id={cat.slug}
+                    checked={currentCategories.includes(cat.slug)}
+                    onChange={(e) => handelSelectCat(e.target)}
+                  />
+                  <label
+                    htmlFor={cat.slug}
+                    className="cursor-pointer text-base font-semibold capitalize"
+                  >
+                    {cat.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex  flex-col gap-4 flex-3 relative w-full ">
+          <div className="py-4 md:py-2 sticky top-16  z-10 bg-white px-4  flex  justify-between items-center md:justify-end">
+            <div className="relative w-full md:hidden ">
+              <button
+                className="flex gap-2"
+                onClick={() => setShowFilter(!showFilter)}
+              >
+                {/* {showFilter ? (
+                  <FiX size={24} className=" md:hidden" />
+                ) : ( */}
+                  <FiFilter size={24} className=" md:hidden" />
+                {/* )} */}
+                <p className="uppercase font-semibold ">Filter</p>
+              </button>
+            </div>
+
+            <select
+              name="sort"
+              id=""
+              className="border p-2 px-4  rounded-none active:border-none outline-0"
+              onChange={(e) => {
+                setSortOption(e.target.value);
+              }}
+            >
+              <option value="rlt">Relative</option>
+              <option value="lth">Low To High</option>
+              <option value="htl">High To Low</option>
+              <option value="nf">Newest first</option>
+            </select>
+            <div
+              className={`absolute left-0 right-0 top-16 w-full bg-white  ${showFilter ? "block" : "hidden"} md:hidden`}
+            >
+              <div className="flex justify-between">
+                <p
+                  onClick={() => setShowFilter(false)}
+                  className="font-semibold cursor-pointer
+                "
+                >
+                  Close
+                </p>
+                {currentCategories.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setCurrentCategories([])}
+                  >
+                    <p className="text-red-500 font-semibold cursor-pointer">
+                      Clear Filters
+                    </p>
+                  </button>
+                )}
+              </div>
+              <div className="border border-black/40 flex flex-col p-4 w-full">
+                <p className="uppercase font-semibold pb-4">Categories</p>
+                {categories?.map((cat, idx) => (
+                  <div key={idx} className="flex gap-3">
+                    <input
+                      type="checkbox"
+                      value={cat.slug}
+                      id={cat.slug}
+                      checked={currentCategories.includes(cat.slug)}
+                      onChange={(e) => handelSelectCat(e.target)}
+                    />
+                    <label
+                      htmlFor={cat.slug}
+                      className="cursor-pointer text-base font-semibold capitalize"
+                    >
+                      {cat.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols ">
+            {listProducts!.length > 0 ? (
+              listProducts?.map((p, index) => (
+                <ProductCard key={index} product={p} />
+              ))
+            ) : (
+              <div className="flex justify-center items-center h-10 w-full  col-span-6">
+                <p>Product not found</p>
+              </div>
+            )}
+          </div>
+          {loading && (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 ">
+              {Array.from({ length: 10 }).map((_, index) => (
+                <ProductCardSkeleton key={index} />
+              ))}
             </div>
           )}
         </div>
-        {loading && (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {Array.from({ length: 10 }).map((_, index) => (
-              <ProductCardSkeleton key={index} />
-            ))}
-          </div>
-        )}
       </div>
-
     </>
   );
 }
