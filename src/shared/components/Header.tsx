@@ -9,10 +9,12 @@ import {
 } from "react-icons/fi";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { images } from "../../constants/images";
+import { useCart } from "../../features/cart/hooks/useCart";
 
 const Header: React.FC = () => {
   const { signOutUser, user, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { totalItems } = useCart();
 
   const navList: string[] = [
     "Home",
@@ -22,6 +24,7 @@ const Header: React.FC = () => {
     "Contact",
   ];
 
+  
  
 
   return (
@@ -75,8 +78,8 @@ const Header: React.FC = () => {
             </button>
             <Link to={"/cart"} className="relative text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer group">
               <FiShoppingCart size={22} />
-              <span className="absolute -top-3 -right-3 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 shadow-lg ring-4 ring-white transition-transform group-hover:scale-110">
-                3
+              <span className={`${totalItems == 0 ? "hidden" :"block" } absolute -top-3 -right-3 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 shadow-lg ring-4 ring-white transition-transform group-hover:scale-110`}>
+                {totalItems }
               </span>
             </Link>
           </div>
