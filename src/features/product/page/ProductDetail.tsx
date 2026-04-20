@@ -1,5 +1,4 @@
 import Breadcrumb from "../../../shared/components/Breadcrumb";
-
 import { images } from "../../../constants/images";
 import { FiChevronLeft, FiChevronRight, FiMinus, FiPlus } from "react-icons/fi";
 import ProductCard from "../components/ProductCard";
@@ -7,7 +6,6 @@ import { useProductDetails } from "../hook/useProductDetails";
 import { useCart } from "../../cart/hooks/useCart";
 
 function ProductDetail() {
-
   const {
     navigate,
     relatedProduct,
@@ -18,15 +16,21 @@ function ProductDetail() {
     currentIdx,
     product,
   } = useProductDetails();
-  const { isTimeStart,
-    addToCartBtn,
-    incQty,
-    decQty,
+  const {
+    isTimeStart,
+    addCartFn,
+     incQty,
+     decQty,
     quantity,
-    setQuantity, } = useCart()
-  console.log(product);
-  
-  
+    sizes,
+    setSizes,
+    setQuantity,
+  } = useCart();
+
+const sizeArray = ["XS","S","M","L","XL", "XXL"]
+
+
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-100">
@@ -39,9 +43,10 @@ function ProductDetail() {
       <div className="flex flex-col gap-3 justify-center items-center h-100">
         <p className="text-2xl text-black/50">Product Nahi mila</p>
         <button
-        onClick={()=>navigate(-1)}
-          className=" flex gap-3 justify-center items-center text-xl bg-slate-900 text-white p-2 pr-4">
-          <FiChevronLeft size={24}/>
+          onClick={() => navigate(-1)}
+          className=" flex gap-3 justify-center items-center text-xl bg-slate-900 text-white p-2 pr-4"
+        >
+          <FiChevronLeft size={24} />
           <p>Back</p>
         </button>
       </div>
@@ -54,13 +59,11 @@ function ProductDetail() {
       {/* desktop */}
       <div className="py-8">
         <button
-          onClick={
-            () => {
-              navigate(-1)
-            }
-          }
-        
-          className="flex items-center gap-2 ">
+          onClick={() => {
+            navigate(-1);
+          }}
+          className="flex items-center gap-2 "
+        >
           <FiChevronLeft size={20} />
           <p className="uppercase ">Back</p>
         </button>
@@ -166,11 +169,21 @@ function ProductDetail() {
                 {product?.category.name}
               </p>
             </div>
+            <div className="flex py-4 gap-3">
+              {sizeArray.map((s) => (
+                <button
+                  onClick={()=>setSizes(s)}
+                  className={`  aspect-square p-3  font-semibold hover:bg-gray-500 transition-all duration-300   text-center flex justify-center items-center ${sizes === s ? "border border-gray-800 text-black" : "bg-slate-900 text-white"}`}
+                >
+                  <p>{s}</p>
+                </button>
+              ))}
+            </div>
             <div className="flex gap-4 items-baseline">
-              <p className="text-2xl text-black/60 font-semibold py-8">
+              <p className="text-2xl text-black/60 font-semibold ">
                 ${product?.price}
               </p>
-              <p className="text-sm text-black/60 font-semibold py-8 line-through">
+              <p className="text-sm text-black/60 font-semibold  line-through">
                 ${product?.price}
               </p>
             </div>
@@ -184,7 +197,9 @@ function ProductDetail() {
                 </button>
                 <input
                   type="number"
-                  value={quantity}
+                  value={quantity ?? 1}
+                  min={1}
+                  max={100}
                   placeholder="0"
                   className="w-25 p-3 border text-center "
                   onChange={(e) => setQuantity(Number.parseInt(e.target.value))}
@@ -207,7 +222,7 @@ function ProductDetail() {
                 ) : (
                   <button
                     type="button"
-                    onClick={addToCartBtn}
+                    onClick={() => addCartFn(product)}
                     className="bg-slate-900  text-white flex text-center p-3 font-semibold hover:bg-gray-700 transition-all duration-300"
                   >
                     Add To Cart
