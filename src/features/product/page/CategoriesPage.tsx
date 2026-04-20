@@ -32,7 +32,11 @@ const CategoriesPage: React.FC = () => {
     setCurrentCategory(value);
     navigate(`/categories/${value}`);
   };
-  const listProduct = !currentCategory ? products : catProducts;
+
+
+  const listProduct = (currentCategory ? catProducts : products);
+  console.log(listProduct);
+  
   return (
     <>
       <Breadcrumb />
@@ -103,8 +107,11 @@ const CategoriesPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {listProduct!.length > 0 ? (
-              listProduct?.map((p) => <ProductCard key={p.id} product={p} />)
+            {listProduct.length > 0 && products.length > 0 ? (
+              listProduct.map((p, i) => {
+
+                return <ProductCard key={i} product={p} />;
+              })
             ) : (
               <div className="flex justify-center items-center h-10 w-full  col-span-6">
                 <p>Product not found</p>

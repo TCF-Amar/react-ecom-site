@@ -87,7 +87,7 @@ function ProductPage() {
             </div>
             <div className="border border-black/40 flex flex-col p-4">
               <p className="uppercase font-semibold pb-4">Categories</p>
-              {categories?.map((cat, idx) => (
+              {categories.map((cat, idx) => (
                 <div key={idx} className="flex gap-3">
                   <input
                     type="checkbox"
@@ -160,7 +160,7 @@ function ProductPage() {
               </div>
               <div className="border border-black/40 flex flex-col p-4 w-full">
                 <p className="uppercase font-semibold pb-4">Categories</p>
-                {categories?.map((cat, idx) => (
+                {categories.map((cat, idx) => (
                   <div key={idx} className="flex gap-3">
                     <input
                       type="checkbox"

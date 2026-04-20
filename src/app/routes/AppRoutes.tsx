@@ -12,6 +12,7 @@ import CartPage from "../../features/cart/pages/CartPage";
 function AppRoutes() {
   return (
     <Routes>
+      
       <Route
         element={
           <ProtectedRoute>

@@ -83,8 +83,6 @@ export const useAuth = () => {
 
 
 
-
-
     return {
         user: state.userData,
         isAuthenticated: !!state.firebaseUser,

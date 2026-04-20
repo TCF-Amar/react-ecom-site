@@ -35,8 +35,12 @@ export const useProductDetails = () => {
 
     useEffect(() => {
         setSlug(location.pathname.split("/").findLast(Boolean) as string);
+        console.log(slug);
+        console.log("Use Effec call");
+        
+            
         fetProduct();
-    }, [slug, location]);
+    }, [slug, location.pathname]);
     const pImages = product?.images || [];
 
     // form mobile

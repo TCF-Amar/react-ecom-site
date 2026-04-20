@@ -9,7 +9,7 @@ const LIMIT = 10
 export const useProduct = () => {
     const dispatch = useAppDispatch()
     const { categories, error, loading, allProducts, hasMore } = useAppSelector(state => state.product);
-    const [catProducts, setCatProducts] = useState<Product[] | null>(null);
+    const [catProducts, setCatProducts] = useState<Product[] | []>([]);
     const [catLoading, setCatLoading] = useState<boolean>(true);
 
     const offset = useRef<number>(0);
