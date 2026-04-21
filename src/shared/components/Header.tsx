@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   FiShoppingCart,
   FiHeart,
@@ -10,11 +10,14 @@ import {
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { images } from "../../constants/images";
 import { useCart } from "../../features/cart/hooks/useCart";
+import { useProduct } from "../../features/product/hook/useProduct";
 
 const Header: React.FC = () => {
   const { signOutUser, user, isAuthenticated } = useAuth();
+  const { setSearchQuery } = useProduct();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { totalItems } = useCart();
+  const navigate = useNavigate();
 
   const navList: string[] = [
     "Home",
@@ -23,9 +26,6 @@ const Header: React.FC = () => {
     "Deals",
     "Contact",
   ];
-
-  
- 
 
   return (
     <header
@@ -64,6 +64,11 @@ const Header: React.FC = () => {
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
           <input
             type="text"
+            onClick={() => {
+              navigate("/products");
+              setSearchQuery("");
+            }}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search products..."
             className="w-full bg-slate-50 border-none  py-2 pl-12 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all outline-none shadow-inner"
           />
@@ -76,10 +81,15 @@ const Header: React.FC = () => {
 
               <span className="absolute top-1 right-1 w-2 h-2 bg-indigo-600 border-2 border-white shadow-sm" />
             </button>
-            <Link to={"/cart"} className="relative text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer group">
+            <Link
+              to={"/cart"}
+              className="relative text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer group"
+            >
               <FiShoppingCart size={22} />
-              <span className={`${totalItems == 0 ? "hidden" :"block" } absolute -top-3 -right-3 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 shadow-lg ring-4 ring-white transition-transform group-hover:scale-110`}>
-                {totalItems }
+              <span
+                className={`${totalItems == 0 ? "hidden" : "block"} absolute -top-3 -right-3 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 shadow-lg ring-4 ring-white transition-transform group-hover:scale-110`}
+              >
+                {totalItems}
               </span>
             </Link>
           </div>
@@ -145,6 +155,12 @@ const Header: React.FC = () => {
               <input
                 type="text"
                 placeholder="Search products..."
+                onClick={() => {
+                  navigate("/products");
+                  // setIsMobileMenuOpen(true)
+                  setSearchQuery("");
+                }}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-slate-50 border-none  py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all outline-none"
               />
             </div>
