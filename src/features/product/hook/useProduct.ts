@@ -1,83 +1,67 @@
-import { useEffect, useRef, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../../app/hooks"
-import { fetchCategories, fetchProducts } from "../slices/productSlice";
-import type { Product } from "../types";
-import { fetchProductByCategory } from "../services/productApiServices";
+import { useEffect, useState } from "react";
+import { fetchCategories, fetchProducts, resetProduct } from "../slices/productSlice";
+import { useAppDispatch, useAppSelector } from "../../../app/hooks";
+import { useDebounce } from "../../../shared/hooks/useDebounce";
 
 
 const LIMIT = 10
 export const useProduct = () => {
-    const dispatch = useAppDispatch()
-    const { categories, error, loading, allProducts, hasMore } = useAppSelector(state => state.product);
-    const [catProducts, setCatProducts] = useState<Product[] | []>([]);
-    const [catLoading, setCatLoading] = useState<boolean>(true);
+    const dispatch = useAppDispatch();
 
-    const offset = useRef<number>(0);
+    const { categories, error, loading, allProducts, hasMore } =
+        useAppSelector(state => state.product);
 
+    const [searchQuery, setSearchQuery] = useState<string>("");
 
-    const lastStep = useRef(-1);
+    const debouncedQuery = useDebounce(searchQuery, 500);
 
     useEffect(() => {
-         
-        dispatch(fetchCategories())
-        dispatch(fetchProducts({ offset: 0, limit: LIMIT }))
-    }, [])
-    
+        dispatch(fetchCategories());
+    }, [dispatch]);
 
+    useEffect(() => {
+        dispatch(resetProduct());
+
+        dispatch(fetchProducts({
+            offset: 0,
+            limit: LIMIT,
+            query: debouncedQuery
+        }));
+    }, [debouncedQuery, dispatch]);
 
     const fetchMore = () => {
         if (loading || !hasMore) return;
 
-        const nextOffset = offset.current + LIMIT;
-        offset.current = nextOffset;
-        dispatch(fetchProducts({ offset: nextOffset, limit: LIMIT }))
-
-    }
-
-    const fetchProductsByCat = async (cat: string) => {
-        setCatLoading(true);
-        try {
-            const data = await fetchProductByCategory(cat);
-            console.log(data);
-
-            setCatProducts(data);
-        } catch (error) {
-            throw new Error("Not Found")
-        } finally {
-            setCatLoading(false);
-
-        }
-
-
-    }
+        dispatch(fetchProducts({
+            offset: allProducts.length,
+            limit: LIMIT,
+            query: debouncedQuery
+        }));
+    };
 
     useEffect(() => {
-        const handelScroll = () => {
-            const scrollUp = window.scrollY;
-            const currentScroll = Math.floor(scrollUp / 200);
-            if (currentScroll !== lastStep.current) {
-                lastStep.current = currentScroll;
-                console.log('scroll ', currentScroll);
-                fetchMore()
-                dispatch(fetchCategories())
-            }
-        }
-        window.addEventListener("scroll", handelScroll)
+        const handleScroll = () => {
+            if (loading || !hasMore) return;
 
-        return () => {
-            window.removeEventListener("scroll", handelScroll);
-        }
-    }, [])
+            const { scrollY, innerHeight } = window;
+            const { scrollHeight } = document.documentElement;
+
+            if (scrollY + innerHeight >= scrollHeight - 300) {
+                fetchMore();
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, [loading, hasMore, allProducts.length, debouncedQuery]);
 
     return {
+        allProducts,
+        fetchMore,
         categories,
         error,
         loading,
-        catProducts,
-        catLoading,
-        allProducts,
-        fetchMore,
-        fetchProductsByCat,
-
-    }
-}
+        setSearchQuery,
+        searchQuery
+    };
+};
