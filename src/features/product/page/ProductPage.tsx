@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import Breadcrumb from "../../../shared/components/Breadcrumb";
-import ProductCardSkeleton from "../../../shared/components/Loader/ProductCardSkeleton";
 import ProductCard from "../components/ProductCard";
 import { useProduct } from "../hook/useProduct";
 import type { Product } from "../types";
 import { FiFilter } from "react-icons/fi";
 
 function ProductPage() {
-  const { loading, allProducts, categories } = useProduct();
+  const {  allProducts, categories } = useProduct();
   const [sortOption, setSortOption] = useState<string | null>(null);
 
   const [currentCategories, setCurrentCategories] = useState<string[]>([]);
@@ -49,7 +48,7 @@ function ProductPage() {
       default:
         break;
     }
-    console.log(filtered);
+    console.log(filtered.length);
 
     setListProducts(filtered);
   };
@@ -219,13 +218,7 @@ function ProductPage() {
               </div>
             )}
           </div>
-          {loading && (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 ">
-              {Array.from({ length: 10 }).map((_, index) => (
-                <ProductCardSkeleton key={index} />
-              ))}
-            </div>
-          )}
+        
         </div>
       </div>
     </>
