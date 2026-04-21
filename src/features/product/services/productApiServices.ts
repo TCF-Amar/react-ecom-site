@@ -2,7 +2,14 @@ import axiosInstance from "../../../utils/axiosInstance"
 
 export const fetchProductByCategory = async (categorySlug: string) => {
     try {
-        const res = await axiosInstance.get(`products?categorySlug=${categorySlug}`)
+        const params = new URLSearchParams({
+            // offset: String(offset),
+            // limit: String(limit),
+            ...(categorySlug.trim() && { categorySlug: categorySlug }),
+            
+            
+        })
+        const res = await axiosInstance.get(`products?${params}`)
         return res.data;
 
     } catch (error: any) {
