@@ -33,9 +33,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 ease-spring">
-          <button className="p-2.5 bg-white rounded-full shadow-lg text-slate-600 hover:text-red-500 hover:scale-110 active:scale-95 transition-all">
-            <FiHeart size={18} />
+        <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-0 opacity-100 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 ease-spring">
+          <button className="p-1 bg-white rounded-full shadow-lg text-slate-600 hover:text-red-500 hover:scale-110 active:scale-95 transition-all">
+            <FiHeart size={12} />
           </button>
         </div>
       </div>
