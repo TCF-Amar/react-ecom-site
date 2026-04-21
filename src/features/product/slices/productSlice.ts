@@ -34,7 +34,7 @@ export const fetchProducts = createAsyncThunk<Product[], ProductFetchPara, { rej
 );
 
 const initialState: ProductState = {
-    products: [],
+    // products: [],
     allProducts:[],
     categories: [],
     loading: false,
@@ -68,7 +68,7 @@ export const productSlice = createSlice({
             .addCase(fetchProducts.fulfilled, (state,action) => {
                 state.loading = false;
                 
-                state.products = action.payload;
+                // state.products = action.payload;
                 state.allProducts = [...state.allProducts, ...action.payload];
 
                 if (action.payload.length === 0) {

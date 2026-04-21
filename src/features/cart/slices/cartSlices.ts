@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CartData } from "../types";
+import type { AddToCartData, CartData, CartState } from "../types";
 import { addProductInCart, getCartProducts } from "../services/firebaseCartServices";
-import type { Product } from "../../product/types";
+import { Timestamp } from "firebase/firestore";
 
 
 export const fetchCartData = createAsyncThunk<
@@ -20,12 +20,7 @@ export const fetchCartData = createAsyncThunk<
     }
 );
 
-export interface AddToCartData {
-    uid: string;
-    product: Product;
-    quantity: number;
-    sizes?: string;
-}
+
 
 export const addToCart = createAsyncThunk<
     CartData,
@@ -33,9 +28,10 @@ export const addToCart = createAsyncThunk<
     { rejectValue: string }
 >(
     "cart/addToCart",
-    async ({ uid, product, quantity, sizes = "M" }, { rejectWithValue }) => {
+    async ({ uid, product, quantity, sizes }, { rejectWithValue }) => {
         try {
-            const cartData: CartData = { product, quantity, sizes };
+
+            const cartData: CartData = { product, quantity, sizes ,createdAt: Timestamp.now()};
             await addProductInCart(uid, product.slug, cartData);
 
             return cartData;
@@ -45,15 +41,6 @@ export const addToCart = createAsyncThunk<
         }
     }
 );
-
-
-
-interface CartState {
-    items: CartData[];
-    loading: boolean;
-    error: string | null;
-}
-
 
 const initialState: CartState = {
     items: [],
@@ -85,18 +72,31 @@ export const cartSlice = createSlice({
             if (item.quantity > 1) {
                 item.quantity -= 1;
             }
-            else {
-
-                state.items.splice(index, 1);
-            }
+            
         },
+
+        removeItemFromCart(state, action: PayloadAction<{ slug: string; sizes: string }>) {
+
+            const index = state.items.findIndex(
+                (i) =>
+                    i.product.slug === action.payload.slug &&
+                    i.sizes === action.payload.sizes
+            );
+            if (index === -1) return;
+            state.items.splice(index, 1);
+        },
+        clearCart(state) {
+            state.items = []
+            
+        }
 
 
     }, extraReducers: (builder) => {
-        builder.addCase(addToCart.pending, (state) => {
-            state.loading = true;
-            state.error = null;
-        })
+        builder
+            .addCase(addToCart.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
             .addCase(addToCart.fulfilled, (state, action) => {
                 state.loading = false;
                 const { product, sizes, quantity } = action.payload;
@@ -108,28 +108,41 @@ export const cartSlice = createSlice({
                     state.items.push(action.payload)
                 }
 
-                console.log("data add huaa");
-
-
             })
             .addCase(addToCart.rejected, (state,) => {
                 state.loading = false;
                 state.error = "Something went wrong"
-            }).addCase(fetchCartData.pending, (state) => {
+            })
+            .addCase(fetchCartData.pending, (state) => {
                 state.loading = true;
                 state.error = null;
-            }).addCase(fetchCartData.fulfilled, (state, action) => {
+            })
+            .addCase(fetchCartData.fulfilled, (state, action) => {
                 state.loading = false;
                 state.items = action.payload;
-            }).addCase(fetchCartData.rejected, (state) => {
+            })
+            .addCase(fetchCartData.rejected, (state) => {
                 state.loading = false;
                 state.error = "Something went Wrong"
             })
+            // .addCase(updateCartItemQty.pending, (state) => {
+            //     // state.loading = true;
+            //     state.error = null;
+            // })
+            // .addCase(updateCartItemQty.fulfilled, (state) => {
+            //     state.loading = false;
+            //     // state.error = null;
+            // })
+            // .addCase(updateCartItemQty.rejected, (state) => {
+            //     state.loading = false;
+            //     state.error = "Something went wrong";
+            // })
+
     }
 
 });
 
-export const { incrementCartItem, decrementCartItem } =
+export const { incrementCartItem, decrementCartItem, removeItemFromCart, clearCart } =
     cartSlice.actions;
 
 

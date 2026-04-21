@@ -1,5 +1,5 @@
 import React from "react";
-import { FiHeart, FiShoppingCart, FiStar } from "react-icons/fi";
+import { FiHeart, FiStar } from "react-icons/fi";
 import type { Product } from "../types";
 import { images } from "../../../constants/images";
 import { Link } from "react-router-dom";
@@ -11,9 +11,12 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const rating = Math.floor(Math.random() * 5) + 1;
   const ratingCount = Math.floor(Math.random() * 500) + 1;
+
   return (
-    
-    <Link to={`/products/${product.slug}`}  className="group cursor-pointer w-full relative flex flex-col bg-white  overflow-hidden  transition-all duration-500 ease-out border border-slate-100 h-full">
+    <Link
+      to={`/products/${product.slug}`}
+      className="group cursor-pointer w-full relative flex flex-col bg-white  overflow-hidden  transition-all duration-500 ease-out border border-slate-100 h-full"
+    >
       <div className="relative aspect-4/5 overflow-hidden bg-slate-50">
         <img
           src={product.images[0]}
@@ -33,13 +36,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 ease-spring">
           <button className="p-2.5 bg-white rounded-full shadow-lg text-slate-600 hover:text-red-500 hover:scale-110 active:scale-95 transition-all">
             <FiHeart size={18} />
-          </button>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-spring">
-          <button className="w-full py-3 bg-slate-900 text-white rounded-xl font-medium text-sm flex items-center justify-center gap-2 shadow-lg hover:bg-slate-800 active:scale-[0.98] transition-all">
-            <FiShoppingCart size={16} />
-            Add to Cart
           </button>
         </div>
       </div>
@@ -76,10 +72,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </span>
             )}
           </div>
-
-          <button className="md:hidden p-2 text-slate-900">
-            <FiShoppingCart size={20} />
-          </button>
         </div>
       </div>
     </Link>

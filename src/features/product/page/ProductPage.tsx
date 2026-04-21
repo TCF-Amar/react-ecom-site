@@ -8,15 +8,14 @@ import { FiFilter } from "react-icons/fi";
 
 function ProductPage() {
   const { loading, allProducts, categories } = useProduct();
+  const [sortOption, setSortOption] = useState<string | null>(null);
 
   const [currentCategories, setCurrentCategories] = useState<string[]>([]);
-  const [sortOption, setSortOption] = useState<string | null>(null);
   const [listProducts, setListProducts] = useState<Product[]>([]);
+  const [showMore, setShowMore] = useState<boolean>(false);
 
-  // for mobile
   const [showFilter, setShowFilter] = useState(false);
 
-  console.log(currentCategories);
   const handelSelectCat = (e: HTMLInputElement) => {
     const { value, checked } = e;
     setCurrentCategories((prev) =>
@@ -50,6 +49,7 @@ function ProductPage() {
       default:
         break;
     }
+    console.log(filtered);
 
     setListProducts(filtered);
   };
@@ -78,32 +78,60 @@ function ProductPage() {
             <div className="flex justify-between ">
               <p className="uppercase font-bold py-4 s">Filters</p>
               {currentCategories.length > 0 && (
-                <button type="button" onClick={() => setCurrentCategories([]) }>
+                <button type="button" onClick={() => setCurrentCategories([])}>
                   <p className="text-red-500 font-semibold cursor-pointer">
                     Clear Filters
                   </p>
                 </button>
               )}
             </div>
-            <div className="border border-black/40 flex flex-col p-4">
+            <div className="border border-black/40 flex flex-col px-4 pt-4 relative pb-8">
               <p className="uppercase font-semibold pb-4">Categories</p>
-              {categories.map((cat, idx) => (
-                <div key={idx} className="flex gap-3">
-                  <input
-                    type="checkbox"
-                    value={cat.slug}
-                    id={cat.slug}
-                    checked={currentCategories.includes(cat.slug)}
-                    onChange={(e) => handelSelectCat(e.target)}
-                  />
-                  <label
-                    htmlFor={cat.slug}
-                    className="cursor-pointer text-base font-semibold capitalize"
-                  >
-                    {cat.name}
-                  </label>
-                </div>
-              ))}
+              <div
+                className={` max-h-125 overflow-hidden overflow-y-auto py-4 hide-scroll `}
+              >
+                {showMore
+                  ? categories.map((cat, idx) => (
+                      <div key={idx} className="flex gap-3">
+                        <input
+                          type="checkbox"
+                          value={cat.slug}
+                          id={cat.slug}
+                          checked={currentCategories.includes(cat.slug)}
+                          onChange={(e) => handelSelectCat(e.target)}
+                        />
+                        <label
+                          htmlFor={cat.slug}
+                          className="cursor-pointer text-base font-semibold capitalize"
+                        >
+                          {cat.name}
+                        </label>
+                      </div>
+                    ))
+                  : [...categories.slice(0, 6)].map((cat, idx) => (
+                      <div key={idx} className="flex gap-3">
+                        <input
+                          type="checkbox"
+                          value={cat.slug}
+                          id={cat.slug}
+                          checked={currentCategories.includes(cat.slug)}
+                          onChange={(e) => handelSelectCat(e.target)}
+                        />
+                        <label
+                          htmlFor={cat.slug}
+                          className="cursor-pointer text-base font-semibold capitalize"
+                        >
+                          {cat.name}
+                        </label>
+                      </div>
+                    ))}
+              </div>
+              <button
+                onClick={() => setShowMore(!showMore)}
+                className="text-sm font-bold absolute bottom-2 right-3 hover:scale-[1px]"
+              >
+                {!showMore ? "Show More" : "Show less"}
+              </button>
             </div>
           </div>
         </div>
@@ -117,7 +145,7 @@ function ProductPage() {
                 {/* {showFilter ? (
                   <FiX size={24} className=" md:hidden" />
                 ) : ( */}
-                  <FiFilter size={24} className=" md:hidden" />
+                <FiFilter size={24} className=" md:hidden" />
                 {/* )} */}
                 <p className="uppercase font-semibold ">Filter</p>
               </button>
@@ -137,7 +165,7 @@ function ProductPage() {
               <option value="nf">Newest first</option>
             </select>
             <div
-              className={`absolute left-0 right-0 top-16 w-full bg-white  ${showFilter ? "block" : "hidden"} md:hidden`}
+              className={`absolute left-0 right-0 top-16 w-full p-4 bg-white  ${showFilter ? "block" : "hidden"} md:hidden`}
             >
               <div className="flex justify-between">
                 <p
@@ -158,7 +186,7 @@ function ProductPage() {
                   </button>
                 )}
               </div>
-              <div className="border border-black/40 flex flex-col p-4 w-full">
+              <div className="border border-black/40 flex flex-col p-4 w-full max-h-100 overflow-hidden overflow-y-auto  ">
                 <p className="uppercase font-semibold pb-4">Categories</p>
                 {categories.map((cat, idx) => (
                   <div key={idx} className="flex gap-3">
@@ -171,7 +199,7 @@ function ProductPage() {
                     />
                     <label
                       htmlFor={cat.slug}
-                      className="cursor-pointer text-base font-semibold capitalize"
+                      className="cursor-pointer text-base font-semibold capitalize line-clamp-1 "
                     >
                       {cat.name}
                     </label>

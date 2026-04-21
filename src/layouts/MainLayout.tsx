@@ -2,6 +2,8 @@
 import { Outlet } from "react-router-dom";
 import TopBar from "../shared/components/TopBar"
 import Header from "../shared/components/Header";
+import  { Toaster } from "react-hot-toast";
+ 
 
 function MainLayout() {
   return (
@@ -12,6 +14,7 @@ function MainLayout() {
         <Outlet />
       </main>
       <footer className="-100"></footer>
+      <Toaster />
     </div>
   );
 }

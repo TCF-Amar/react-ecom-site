@@ -18,6 +18,7 @@ export const useProduct = () => {
     const lastStep = useRef(-1);
 
     useEffect(() => {
+         
         dispatch(fetchCategories())
         dispatch(fetchProducts({ offset: 0, limit: LIMIT }))
     }, [])

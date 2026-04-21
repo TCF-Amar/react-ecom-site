@@ -1,17 +1,23 @@
+import toast from "react-hot-toast";
+
 import { useCallback, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { useAuth } from "../../auth/hooks/useAuth";
 import {
   fetchCartData,
   addToCart,
-  type AddToCartData,
   incrementCartItem,
   decrementCartItem,
+  // updateCartItemQty,
+  removeItemFromCart,
+  clearCart,
 } from "../slices/cartSlices";
 import type { Product } from "../../product/types";
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../../../app/store";
 import { useDebounce } from "../../../shared/hooks/useDebounce";
+import type { AddToCartData, CartData, CartUpdateData } from "../types";
+import { clearCartAllItems, removeProductFromCart, updateQty } from "../services/firebaseCartServices";
 
 const selectTotalItems = createSelector(
   (state: RootState) => state.cart.items,
@@ -27,6 +33,7 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
   const [sizes, setSizes] = useState<string>("");
   const [isTimeStart, setTimeStart] = useState(false);
   const totalItems = useAppSelector(selectTotalItems);
+  const [updData, setUpdData] = useState<CartUpdateData>();
 
   const userId = user?.uid;
 
@@ -41,23 +48,31 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
   }, [autoFetch, fetchCart]);
 
   const addCartFn = async (product: Product) => {
-    setTimeStart(true);
     const data: AddToCartData = {
       uid: user!.uid,
       product,
       quantity,
       sizes,
     };
-    await dispatch(addToCart(data));
+    if ( product.category.slug === "clothes"  && sizes === ""  ) {
+      console.log("Size Must be required");
+      toast.error("Size Toh select karo ");
 
-    setQuantity(1);
-    setTimeout(() => {
-      setTimeStart(false);
-    }, 1000 * 3);
+      return;
+    } else {
+      setTimeStart(true);
+      await dispatch(addToCart(data));
+      toast.success("Item add to cart");
+      setQuantity(1);
+      setTimeout(() => {
+        setTimeStart(false);
+      }, 1000 * 30);
+    }
   };
 
   const incQty = () => {
     setQuantity((prev) => prev + 1);
+    setTimeStart(false);
   };
   const decQty = () => {
     if (quantity <= 1) {
@@ -66,34 +81,81 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
     setQuantity((prev) => prev - 1);
   };
 
+
   const handleIncrement = (slug: string, sizes: string) => {
     dispatch(incrementCartItem({ slug, sizes }));
     const item = items.find(
       (i) => i.product.slug === slug && i.sizes === sizes,
     );
-    if (item) setActiveItem({ slug, sizes, quantity: item.quantity + 1 });
+    if (item) {
+      setActiveItem({ slug, sizes, quantity: item.quantity + 1 });
+      setUpdData({ uid: user!.uid, slug: slug, sizes, qty: item.quantity + 1 });
+    }
   };
 
   const handleDecrement = (slug: string, sizes: string) => {
     const item = items.find(
       (i) => i.product.slug === slug && i.sizes === sizes,
     );
-    if (!item || item.quantity <= 1) return;
+    if (!item || item.quantity <= 1) {
+      const confirmation = confirm(" Delete Karna Hai kya item", );
+      if (confirmation) {
+        dispatch(removeItemFromCart({ slug, sizes }));
+        toast.success("Delete Kar Diya LOL")
+      }
+
+      return;
+    }
 
     dispatch(decrementCartItem({ slug, sizes }));
+
     setActiveItem({ slug, sizes, quantity: item.quantity - 1 });
+    setUpdData({
+      uid: user!.uid,
+      slug: slug,
+      sizes,
+      qty: item.quantity - 1,
+    });
   };
   const [activeItem, setActiveItem] = useState<{
     slug: string;
     sizes: string;
     quantity: number;
   } | null>(null);
+
   const debouncedQty = useDebounce(activeItem?.quantity, 500);
 
+  const update = async () => {
+    await updateQty(updData as CartUpdateData);
+  };
   useEffect(() => {
     if (!user?.uid || !activeItem) return;
-    console.log("API CAll");
+    update();
   }, [debouncedQty]);
+
+
+  const removeItemFromCartFn = async (slug:string, sizes:string) => {
+    const confirmation = confirm(" Delete Karna Hai kya item");
+    if (confirmation) {
+      dispatch(removeItemFromCart({ slug, sizes }));
+      await removeProductFromCart({uid: user!.uid,slug , sizes  })
+      toast.success("Delete Kar Diya LOL");
+    }
+    
+    
+  }
+
+  const cartClear = async (cartData: CartData[]) => {
+    const confirmation = confirm("Sach main pura cart khali karna hai");
+    if (confirmation) {
+      dispatch(clearCart());
+      await clearCartAllItems(cartData, user!.uid)
+      toast.success("Lo fir kar diya khali");
+    } else {
+      toast("Theek fir nahi kar raha khali");
+      
+    }
+  }
 
   return {
     dispatch,
@@ -112,5 +174,8 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
     totalItems,
     handleIncrement,
     handleDecrement,
+    removeItemFromCartFn,
+    cartClear,
+    setTimeStart
   };
 };

@@ -1,4 +1,4 @@
-import { FiChevronLeft } from "react-icons/fi";
+import { FiChevronLeft, FiTrash2 } from "react-icons/fi";
 import Breadcrumb from "../../../shared/components/Breadcrumb";
 import { useCart } from "../hooks/useCart";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,7 @@ import { useMemo } from "react";
 const SHIPPING_CHARGE = 100;
 function CartPage() {
   const navigate = useNavigate();
-  const { cartData, loading,  } = useCart();
+  const { cartData, loading, cartClear } = useCart();
 
   const totalPrice = useMemo(
     () =>
@@ -21,7 +21,7 @@ function CartPage() {
 
   const grandTotal = totalPrice + SHIPPING_CHARGE;
 
-  console.log(grandTotal);
+  // console.log(grand  Total);
 
   if (loading) {
     return (
@@ -49,8 +49,17 @@ function CartPage() {
       <Breadcrumb />
       <div className="flex flex-col lg:flex-row gap-2 py-8 relative">
         <div className="flex-2 ">
-          <div className=" flex flex-col">
-            <p className=" uppercase font-bold p-3">Cart Products</p>
+          <div className="flex items-center justify-between">
+            <div className=" flex flex-col">
+              <p className=" uppercase font-bold p-3">Cart Products</p>
+            </div>
+            <button
+              onClick={() => cartClear(cartData)}
+              className="flex gap-2  items-center justify-center text-red-500"
+            >
+              <FiTrash2 />
+              <p>Clear</p>
+            </button>
           </div>
 
           <div className="flex flex-col gap-2">

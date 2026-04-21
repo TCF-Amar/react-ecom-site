@@ -1,12 +1,18 @@
-import { collection, doc, getDoc, getDocs, increment, setDoc, updateDoc } from "firebase/firestore"
+import { collection, deleteDoc, doc, getDoc, getDocs, increment, orderBy, query, setDoc, updateDoc } from "firebase/firestore"
 import { fireStore } from "../../../config/firebaseConfigure"
-import type { CartData } from "../types";
+import type { CartData, CartUpdateData, ItemRemoveData } from "../types";
 
 
 export const getCartProducts = async (userId: string) => {
+
     const cartRef = collection(fireStore, "users", userId, "cart");
 
-    const snapshot = await getDocs(cartRef);
+    const q = query(cartRef, orderBy("createdAt", "desc"))
+
+    console.log(q);
+    
+    const snapshot = await getDocs(q);
+    console.log(snapshot.docs);
 
     return snapshot.docs.map((doc) => {
         const data = doc.data();
@@ -14,7 +20,8 @@ export const getCartProducts = async (userId: string) => {
             cid: doc.id,
             product: data.product,
             sizes: data.sizes,
-            quantity: data.quantity
+            quantity: data.quantity,
+
         } as CartData
 
 
@@ -32,7 +39,8 @@ export const addProductInCart = async (uid: string, slug: string, data: CartData
         if (snapshot.exists()) {
             await updateDoc(cartRef, {
                 ...data,
-                quantity: increment(data.quantity ?? 1)
+                quantity: increment(data.quantity ?? 1),
+                
             });
         } else {
 
@@ -49,8 +57,56 @@ export const addProductInCart = async (uid: string, slug: string, data: CartData
 
 }
 
-export const removeProductFromCart = async () => { }
+export const updateQty = async (updData: CartUpdateData) => {
+    try {
+        const cartRef = doc(fireStore, "users", updData.uid, "cart", `${updData.slug}_${updData.sizes}`);
 
-export const clearCart = async () => {
+        const snap = await getDoc(cartRef)
+        console.log(snap.data());
+
+        if (!snap.exists()) return;
+
+        const data = snap.data();
+        const cartData = {
+            product: data!.product,
+            sizes: data.sizes,
+            quantity: updData.qty
+            
+        }
+        await updateDoc(cartRef, cartData)
+
+    } catch (error) {
+        throw error;
+    }
+
+
+
+}
+
+export const removeProductFromCart = async (rmv: ItemRemoveData) => {
+    try {
+
+        const cartRef = doc(fireStore, "users", rmv.uid, "cart", `${rmv.slug}_${rmv.sizes}`)
+
+        await deleteDoc(cartRef);
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const clearCartAllItems = async (items: CartData[], uid: string) => {
+
+    try {
+        for (let i in items) {
+
+            const cartRef = doc(fireStore, "users", uid, "cart", `${items[i].product.slug}_${items[i].sizes}`)
+            await deleteDoc(cartRef);
+
+        }
+
+    } catch (error) {
+        throw error
+    }
 
 }

@@ -25,6 +25,7 @@ function ProductDetail() {
     sizes,
     setSizes,
     setQuantity,
+    setTimeStart
   } = useCart();
 
 const sizeArray = ["XS","S","M","L","XL", "XXL"]
@@ -158,8 +159,10 @@ const sizeArray = ["XS","S","M","L","XL", "XXL"]
 
           {/* mobile */}
 
-          <div className="flex-1 flex flex-col">
-            <div className="flex h-fit gap-2 p-2 border border-black/40 items-center">
+          <div
+            className={`flex-1 flex flex-col `}
+          >
+            <div className={`flex h-fit gap-2 p-2 border border-black/40 items-center `}>
               <img
                 src={product?.category.image}
                 alt={product?.category.name}
@@ -169,16 +172,25 @@ const sizeArray = ["XS","S","M","L","XL", "XXL"]
                 {product?.category.name}
               </p>
             </div>
-            <div className="flex py-4 gap-3">
-              {sizeArray.map((s) => (
-                <button
-                  onClick={()=>setSizes(s)}
-                  className={`  aspect-square p-3  font-semibold hover:bg-gray-500 transition-all duration-300   text-center flex justify-center items-center ${sizes === s ? "border border-gray-800 text-black" : "bg-slate-900 text-white"}`}
-                >
-                  <p>{s}</p>
-                </button>
-              ))}
-            </div>
+            {
+              product.category.slug === "clothes" ?
+                
+            
+                <div className={`flex py-4 gap-3 `}>
+                  {sizeArray.map((s) => (
+                    <button
+                      onClick={() => {
+                        setTimeStart(false);
+                        setSizes(s);
+                      }}
+                      className={`  aspect-square p-3  font-semibold hover:bg-gray-500 transition-all duration-300   text-center flex justify-center items-center ${sizes === s ? "border border-gray-800 text-black" : "bg-slate-900 text-white"}`}
+                    >
+                      <p>{s}</p>
+                    </button>
+                  ))}
+                </div> : <div className="h-10">
+                
+                </div>}
             <div className="flex gap-4 items-baseline">
               <p className="text-2xl text-black/60 font-semibold ">
                 ${product?.price}

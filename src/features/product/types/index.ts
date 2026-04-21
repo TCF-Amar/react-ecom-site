@@ -1,5 +1,5 @@
 export interface ProductState {
-    products: Product[];
+    // products: Product[];
     allProducts: Product[];
     categories: Category[];
     loading: boolean;
