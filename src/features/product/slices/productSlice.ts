@@ -15,15 +15,27 @@ export const fetchCategories = createAsyncThunk("product/fetchCategories", async
 
 interface ProductFetchPara {
     offset: number;
-    limit: number
+    limit: number;
+    query?: string;
+    categoryId?: number;
 }
 
 export const fetchProducts = createAsyncThunk<Product[], ProductFetchPara, { rejectValue: string }>(
     "product/fetchProducts",
     async (p, { rejectWithValue }) => {
+
+        const params = new URLSearchParams({
+            offset: String(p.offset),
+            limit: String(p.limit),
+            ...(p.query?.trim() && { title: p.query.trim() }),
+            ...(p.categoryId?.toString().trim() &&
+                { categoryId: p.categoryId.toString().trim() }),
+
+        })
+
         try {
             const res = await axiosInstance.get(
-                `products?offset=${p.offset}&limit=${p.limit}`
+                `products?${params}`
             );
 
             return res.data;
@@ -34,8 +46,7 @@ export const fetchProducts = createAsyncThunk<Product[], ProductFetchPara, { rej
 );
 
 const initialState: ProductState = {
-    // products: [],
-    allProducts:[],
+    allProducts: [],
     categories: [],
     loading: false,
     error: null,
@@ -45,7 +56,11 @@ const initialState: ProductState = {
 export const productSlice = createSlice({
     name: "product",
     initialState,
-    reducers: {},
+    reducers: {
+        resetProduct: (state) => {
+            state.allProducts = [];
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchCategories.pending, (state) => {
@@ -65,21 +80,24 @@ export const productSlice = createSlice({
                 state.error = null;
 
             })
-            .addCase(fetchProducts.fulfilled, (state,action) => {
+            .addCase(fetchProducts.fulfilled, (state, action) => {
                 state.loading = false;
-                
-                // state.products = action.payload;
-                state.allProducts = [...state.allProducts, ...action.payload];
 
                 if (action.payload.length === 0) {
                     state.hasMore = false;
+                    return;
                 }
-             })
+
+                const existingIds = new Set(state.allProducts.map(p => p.id));
+                const newProducts = action.payload.filter(p => !existingIds.has(p.id));
+
+                state.allProducts = [...state.allProducts, ...newProducts];
+            })
             .addCase(fetchProducts.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error
             })
     }
 })
-
+export const { resetProduct } = productSlice.actions;
 export default productSlice.reducer
