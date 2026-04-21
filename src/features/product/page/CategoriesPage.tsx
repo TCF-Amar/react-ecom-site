@@ -1,10 +1,10 @@
-import { useProduct } from "../hook/useProduct";
 import Breadcrumb from "../../../shared/components/Breadcrumb";
 import { useLocation, useNavigate } from "react-router-dom";
 import { images } from "../../../constants/images";
 import { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import ProductCardSkeleton from "../../../shared/components/Loader/ProductCardSkeleton";
+import { useCategory } from "../hook/useCategory";
 
 const CategoriesPage: React.FC = () => {
   const {
@@ -12,8 +12,7 @@ const CategoriesPage: React.FC = () => {
     fetchProductsByCat,
     catProducts,
     catLoading,
-    allProducts: products,
-  } = useProduct();
+  } = useCategory();
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -34,8 +33,6 @@ const CategoriesPage: React.FC = () => {
   };
 
 
-  const listProduct = (currentCategory ? catProducts : products);
-  console.log(listProduct);
   
   return (
     <>
@@ -52,7 +49,7 @@ const CategoriesPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="py-8">
+      <div className="py-8 sticky top-10 bg-white z-10">
         <div className="hidden md:flex flex-wrap gap-3">
           <button
             onClick={() => handelSelectCurrenCat("")}
@@ -107,8 +104,8 @@ const CategoriesPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {listProduct.length > 0 && products.length > 0 ? (
-              listProduct.map((p, i) => {
+            {catProducts.length > 0 ? (
+              catProducts.map((p, i) => {
 
                 return <ProductCard key={i} product={p} />;
               })
