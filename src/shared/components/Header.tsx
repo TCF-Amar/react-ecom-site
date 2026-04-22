@@ -23,7 +23,7 @@ const Header: React.FC = () => {
     "Home",
     "Products",
     "Categories",
-    "Deals",
+    "Admin",
     "Contact",
   ];
 

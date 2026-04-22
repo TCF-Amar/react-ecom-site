@@ -59,6 +59,7 @@ export const productSlice = createSlice({
     reducers: {
         resetProduct: (state) => {
             state.allProducts = [];
+            state.hasMore = true;
         }
     },
     extraReducers: (builder) => {
