@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { useDebounce } from "../../../shared/hooks/useDebounce";
 
 
-const LIMIT = 10
+const LIMIT = 20
 export const useProduct = () => {
     const dispatch = useAppDispatch();
 
@@ -13,11 +13,18 @@ export const useProduct = () => {
 
     const [searchQuery, setSearchQuery] = useState<string>("");
 
-    const debouncedQuery = useDebounce(searchQuery, 500);
+
+    const query = useDebounce(searchQuery, 500);
 
     useEffect(() => {
-        dispatch(fetchCategories());
-    }, [dispatch]);
+        if (allProducts.length === 0) {
+            dispatch(fetchCategories());
+            dispatch(fetchProducts({
+                offset: 0,
+                limit: LIMIT,
+            }));
+        }
+    }, []);
 
     useEffect(() => {
         dispatch(resetProduct());
@@ -25,9 +32,9 @@ export const useProduct = () => {
         dispatch(fetchProducts({
             offset: 0,
             limit: LIMIT,
-            query: debouncedQuery
+            query:  query
         }));
-    }, [debouncedQuery, dispatch]);
+    }, [query]);
 
     const fetchMore = () => {
         if (loading || !hasMore) return;
@@ -35,7 +42,7 @@ export const useProduct = () => {
         dispatch(fetchProducts({
             offset: allProducts.length,
             limit: LIMIT,
-            query: debouncedQuery
+            query: query
         }));
     };
 
@@ -45,20 +52,22 @@ export const useProduct = () => {
 
             const { scrollY, innerHeight } = window;
             const { scrollHeight } = document.documentElement;
+            console.log(innerHeight);
+            
 
-            if (scrollY + innerHeight >= scrollHeight - 300) {
+            if (scrollY + innerHeight >= scrollHeight - 100) {
                 fetchMore();
             }
         };
 
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
-    }, [loading, hasMore, allProducts.length, debouncedQuery]);
+    }, [loading, hasMore, query]);
 
     return {
         allProducts,
         fetchMore,
-        categories,
+        categories, 
         error,
         loading,
         setSearchQuery,
