@@ -54,7 +54,7 @@ function CartPage() {
               <p className=" uppercase font-bold p-3">Cart Products</p>
             </div>
             <button
-              onClick={() => cartClear(cartData)}
+              onClick={() => cartClear()}
               className="flex gap-2  items-center justify-center text-red-500"
             >
               <FiTrash2 />
@@ -90,7 +90,7 @@ function CartPage() {
               <p>Total : </p>
               <p>${grandTotal}</p>
             </div>
-            <button className="fixed  bottom-0 left-0 right-0  p-4  bg-slate-900 text-white  w-full lg:static">
+            <button onClick={()=>navigate("/checkout")} className="fixed  bottom-0 left-0 right-0  p-4  bg-slate-900 text-white  w-full lg:static">
               Checkout (${grandTotal})
             </button>
           </div>
