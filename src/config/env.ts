@@ -8,4 +8,5 @@ export const env = {
     firebaseBaseMessagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     firebaseBaseAppId: import.meta.env.VITE_FIREBASE_APP_ID,
     firebaseBaseMeasurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+    StripePublishableKey: import.meta.env.VITE_STRIPE_PUBLIC_KEY
 }
