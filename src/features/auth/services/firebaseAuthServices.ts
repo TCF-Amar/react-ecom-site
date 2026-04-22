@@ -1,4 +1,4 @@
-import { fireStore } from './../../../config/firebaseConfigure';
+import { db } from './../../../config/firebaseConfigure';
 import { auth, } from "../../../config/firebaseConfigure";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore"
@@ -41,7 +41,7 @@ export const signUp = async (email: string, password: string, username: string) 
 }
 export const storeUserInFireStore = async (uid: string, user: object) => {
     try {
-        await setDoc(doc(fireStore, "users", uid), user)
+        await setDoc(doc(db, "users", uid), user)
     } catch (error) {
         throw error;
     }
@@ -49,7 +49,7 @@ export const storeUserInFireStore = async (uid: string, user: object) => {
 
 export const fetchUserFromFireStore = async (uid: string) => {
     try {
-        const docSnap = await getDoc(doc(fireStore, "users", uid));
+        const docSnap = await getDoc(doc(db, "users", uid));
         if (docSnap.exists()) {
             return docSnap.data();
         } else {
@@ -80,7 +80,7 @@ export const signOut = async () => {
 //         const user = result.user;
 
 
-//         const docSnap = await getDoc(doc(fireStore, "users", user.uid));
+//         const docSnap = await getDoc(doc(db, "users", user.uid));
 //         if (docSnap.exists()) {
 //             const data = docSnap.data();
 //             const userData: UserData = {
