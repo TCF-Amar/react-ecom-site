@@ -16,7 +16,7 @@ import type { Product } from "../../product/types";
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../../../app/store";
 import { useDebounce } from "../../../shared/hooks/useDebounce";
-import type { AddToCartData, CartData, CartUpdateData } from "../types";
+import type { AddToCartData,  CartUpdateData } from "../types";
 import { clearCartAllItems, removeProductFromCart, updateQty } from "../services/firebaseCartServices";
 
 const selectTotalItems = createSelector(
@@ -145,17 +145,21 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
     
   }
 
-  const cartClear = async (cartData: CartData[]) => {
+  const cartClear = async () => {
     const confirmation = confirm("Sach main pura cart khali karna hai");
     if (confirmation) {
       dispatch(clearCart());
-      await clearCartAllItems(cartData, user!.uid)
+      await clearCartAllItems(items, user!.uid)
       toast.success("Lo fir kar diya khali");
     } else {
       toast("Theek fir nahi kar raha khali");
       
     }
   }
+  const cartClearCheckout = async () => {
+    dispatch(clearCart());
+    await clearCartAllItems(items, user!.uid);
+  };
 
   return {
     dispatch,
@@ -176,6 +180,7 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
     handleDecrement,
     removeItemFromCartFn,
     cartClear,
-    setTimeStart
+    setTimeStart,
+    cartClearCheckout,
   };
 };
