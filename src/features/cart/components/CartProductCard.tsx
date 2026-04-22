@@ -50,6 +50,7 @@ function CartProductCard({ product }: { product: CartData }) {
             placeholder="0"
             className="w-25 p-3 border text-center "
             // onChange={(e) => { }}
+            readOnly
           />
           <button
             type="button"
