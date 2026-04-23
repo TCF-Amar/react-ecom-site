@@ -1,13 +1,26 @@
 import axiosInstance from "../../../utils/axiosInstance"
 
+
+
+
+// export const fetchProductViaFirestore = async () => {
+//     try {
+//         const pcRef 
+
+//     } catch (error: unknown) {
+//         throw error
+
+//     }
+// }
+
 export const fetchProductByCategory = async (categorySlug: string) => {
     try {
         const params = new URLSearchParams({
             // offset: String(offset),
             // limit: String(limit),
             ...(categorySlug.trim() && { categorySlug: categorySlug }),
-            
-            
+
+
         })
         const res = await axiosInstance.get(`products?${params}`)
         return res.data;

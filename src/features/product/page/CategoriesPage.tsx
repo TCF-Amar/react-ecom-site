@@ -31,6 +31,7 @@ const CategoriesPage: React.FC = () => {
   return (
     <>
       <Breadcrumb />
+      
 
       <div className="py-4 flex flex-col">
         <p className="text-xl md:text-3xl font-bold ">Explore All Categories</p>
@@ -65,13 +66,13 @@ const CategoriesPage: React.FC = () => {
                   <button
                     key={category.id}
                     onClick={() => handelSelectCurrenCat(category.slug)}
-                    className={`px-4 md:px-0 h-10  text-sm font-bold transition-all duration-300 flex items-center justify-center gap-3   w-37 line-clamp-1 overflow-hidden hover:scale-105  ${
+                    className={`px- md:px-0 h-10  text-sm font-bold transition-all duration-300 flex items-center justify-center gap-   w-37 line-clamp-1 overflow-hidden hover:scale-105  ${
                       isActive
                         ? "bg-indigo-600 text-white shadow-xl shadow-indigo-200 scale-105"
                         : "bg-white text-slate-600 hover:bg-slate-50 border border-[#48484864]"
                     }`}
                   >
-                    <span className="h-10 w-10  overflow-hidden hidden sm:block">
+                    <span className="h-10 w-10  overflow-hidden hidden sm:block flex-1">
                       <img
                         src={category.image}
                         alt=""

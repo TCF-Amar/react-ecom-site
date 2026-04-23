@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks"
 import { fetchCategories } from "../slices/productSlice";
 import type { Product } from "../types";
-import { fetchProductByCategory } from "../services/productApiServices";
+import { fetchProductByCategory } from "../services/productFirebaseServices";
 
 export const useCategory = () => {
 

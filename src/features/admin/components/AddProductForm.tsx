@@ -1,30 +1,44 @@
 import { FiImage, FiX } from "react-icons/fi";
 import { useCategory } from "../../product/hook/useCategory";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import type { AddProductData } from "../services/adminApiServices";
 import toast from "react-hot-toast";
 import { useAdmin } from "../hooks/useAdmin";
+import type { AddProductData, FireStoreProductModel } from "../types";
 
 function AddProductForm({
   showForm,
   toggleForm,
+  editingProduct = null,
 }: {
   showForm: boolean;
   toggleForm: () => void;
+  editingProduct?: FireStoreProductModel | null;
 }) {
   const { categories } = useCategory();
 
-  const { register, handleSubmit } = useForm<AddProductData>({
-      defaultValues: {
-          title: "Title",
-          price: 354,
-          description: "sdfsd",
-          categoryId: 1,
-          
-      },
-  });
-  const { addProductFn } = useAdmin();
+  const { register, handleSubmit, reset } = useForm<AddProductData>({});
+  const { addProductFn, updateProductFn, adding, updating } = useAdmin();
+
+  useEffect(() => {
+    if (editingProduct) {
+      reset({
+        title: editingProduct.title,
+        price: editingProduct.price,
+        description: editingProduct.description,
+        categoryId: editingProduct.categoryId,
+      });
+      setImages(editingProduct.images);
+    } else {
+      reset({
+        title: "",
+        price: null,
+        description: "",
+        categoryId: 1,
+      });
+      setImages(["https://placehold.co/600x400"]);
+    }
+  }, [editingProduct, reset]);
 
   const [images, setImages] = useState<string[]>([
     "https://placehold.co/600x400",
@@ -36,8 +50,8 @@ function AddProductForm({
       Array.from(files).forEach((file) => {
         const read = new FileReader();
         read.onload = (event) => {
-          const src = event.target?.result as string;
-          setImages((prev) => [...prev, src]);
+          const img = event.target?.result as string;
+          setImages((prev) => [...prev, img]);
         };
         read.readAsDataURL(file);
       });
@@ -49,8 +63,25 @@ function AddProductForm({
       toast.error("Are sare filed toh add karo ");
       return;
     }
-    addProductFn({ ...data, images });
+
+    if (editingProduct) {
+      updateProductFn({ ...data, images }, editingProduct.id);
+    } else {
+      addProductFn({ ...data, images });
+    }
+
     console.log("Form Data:", { ...data, images });
+    // setImages([]);
+
+    setTimeout(() => {
+      toggleForm();
+      reset({
+        title: "",
+        price: null,
+        description: "",
+        categoryId: 1,
+      });
+    }, 500);
   });
 
   return (
@@ -58,7 +89,7 @@ function AddProductForm({
       className={`fixed top-0 right-0 left-0 bottom-0 flex z-100  justify-end transition-opacity duration-200 ${showForm ? "" : "bg-transparent pointer-events-none"}`}
     >
       <div
-        className={`bg-white shadow transition-transform duration-500 w-1/2 ${showForm ? "translate-x-0" : "translate-x-full"}`}
+        className={`bg-white shadow transition-transform duration-500 w-full md:w-1/2 ${showForm ? "translate-x-0" : "translate-x-full"}`}
       >
         <div
           className=" flex font-semibold justify-start items-center cursor-pointer p-2 hover:font-bold  duration-300"
@@ -116,7 +147,9 @@ function AddProductForm({
                 {...register("categoryId")}
               >
                 {categories.map((item) => (
-                  <option value={item.id}>{item.name}</option>
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
                 ))}
               </select>
             </label>
@@ -162,7 +195,13 @@ function AddProductForm({
             type="submit"
             className="w-full bg-blue-500 my-4 mb-10 py-2 text-white font-semibold  hover:bg-blue-600 duration-300 active:bg-blue-700"
           >
-            Add Product lorem
+            {adding || updating
+              ? editingProduct
+                ? "Update ho raha hai wait...."
+                : "Add ho raha hai wait...."
+              : editingProduct
+                ? "Update Product"
+                : "Add Product"}
           </button>
         </form>
       </div>

@@ -77,13 +77,12 @@ export function Checkout() {
       </div>
       <br />
       <br />
-      <div className="bg-gray-400  p-4 text-white">
-        <CardElement className="text-white text-xl" />
-      </div>
+      
+        <CardElement className="bg-green-500/20 p-5" />
       <br />
       <br />
       <button
-        className="bg-slate-900 p-3 min-w-25 text-white"
+        className=" p-3 min-w-25 text-white"
         onClick={handlePayment}
         disabled={loading}
       >

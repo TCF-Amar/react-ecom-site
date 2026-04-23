@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { fetchProductBySlug, fetchRelatedProduct } from "../services/productApiServices";
+import { fetchProductBySlug, fetchRelatedProduct } from "../services/productFirebaseServices";
 import type { Product } from "../types";
 
 export const useProductDetails = () => {
@@ -26,7 +26,9 @@ export const useProductDetails = () => {
             setRelatedProduct(relatedData);
             setProduct(data);
             setLoading(false);
-        } catch (error) {
+        } catch (error: unknown) {
+            console.log(error);
+            
             
         } finally {
             setLoading(false);
@@ -36,7 +38,6 @@ export const useProductDetails = () => {
     useEffect(() => {
         setSlug(location.pathname.split("/").findLast(Boolean) as string);
         console.log(slug);
-        console.log("Use Effec call");
         
             
         fetProduct();
@@ -58,10 +59,6 @@ export const useProductDetails = () => {
             setCurrentIdx(pImages.length - 1);
         }
     };
-
-
-
-
 
     return {
         navigate,

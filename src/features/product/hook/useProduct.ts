@@ -55,7 +55,7 @@ export const useProduct = () => {
             console.log(innerHeight);
             
 
-            if (scrollY + innerHeight >= scrollHeight - 100) {
+            if (scrollY + innerHeight >= scrollHeight - 10) {
                 fetchMore();
             }
         };
