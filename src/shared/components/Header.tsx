@@ -2,19 +2,19 @@ import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   FiShoppingCart,
-  FiHeart,
   FiUser,
   FiSearch,
   FiMenu,
+  FiX,
 } from "react-icons/fi";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { images } from "../../constants/images";
-import { useCart } from "../../features/cart/hooks/useCart";
 import { useProduct } from "../../features/product/hook/useProduct";
+import { useCart } from "../../features/cart/useCart";
 
 const Header: React.FC = () => {
   const { signOutUser, user, isAuthenticated } = useAuth();
-  const { setSearchQuery } = useProduct();
+  const { setSearchQuery, searchQuery } = useProduct();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { totalItems } = useCart();
   const navigate = useNavigate();
@@ -22,7 +22,6 @@ const Header: React.FC = () => {
   const navList: string[] = [
     "Home",
     "Products",
-    "Categories",
     "Admin",
     "Contact",
   ];
@@ -64,23 +63,28 @@ const Header: React.FC = () => {
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
           <input
             type="text"
+            value={searchQuery}
             onClick={() => {
               navigate("/products");
-              setSearchQuery("");
             }}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search products..."
             className="w-full bg-slate-50 border-none  py-2 pl-12 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all outline-none shadow-inner"
           />
+          {
+            searchQuery.length !==  0 && 
+            (
+             <FiX 
+             onClick={() => setSearchQuery("")}
+             className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer"
+             /> 
+            )
+          }
         </div>
 
         <div className="flex items-center gap-4 sm:gap-6">
           <div className="flex items-center gap-4">
-            <button className="p-2 text-slate-600 hover:text-indigo-600 transition-colors relative">
-              <FiHeart size={22} />
-
-              <span className="absolute top-1 right-1 w-2 h-2 bg-indigo-600 border-2 border-white shadow-sm" />
-            </button>
+           
             <Link
               to={"/cart"}
               className="relative text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer group"
@@ -154,11 +158,10 @@ const Header: React.FC = () => {
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
+                value={searchQuery}
                 placeholder="Search products..."
                 onClick={() => {
                   navigate("/products");
-                  // setIsMobileMenuOpen(true)
-                  setSearchQuery("");
                 }}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-slate-50 border-none  py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all outline-none"
@@ -180,12 +183,7 @@ const Header: React.FC = () => {
             </nav>
 
             <div className="grid grid-cols-2 gap-4 md:hidden">
-              <Link
-                to={"/wishlist"}
-                className="flex items-center justify-center gap-3 py-4 bg-slate-50  text-slate-900 font-bold border border-slate-100 active:scale-95 transition-all hover:scale-105"
-              >
-                <FiHeart size={20} /> Wishlist
-              </Link>
+             
               <Link
                 to={"/profile"}
                 className="flex items-center justify-center gap-3 py-4 bg-slate-50  text-slate-900 font-bold border border-slate-100 active:scale-95 transition-all hover:scale-105"
