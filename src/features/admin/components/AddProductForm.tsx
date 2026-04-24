@@ -1,10 +1,11 @@
 import { FiImage, FiX } from "react-icons/fi";
-import { useCategory } from "../../product/hook/useCategory";
+// import { useCategory } from "../../product/hook/useCategory";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { useAdmin } from "../hooks/useAdmin";
-import type { AddProductData, FireStoreProductModel } from "../types";
+import { useAdmin } from "../useAdmin";
+import type { AddProductData, FireStoreProductModel } from "../adminTypes";
+import { useProduct } from "../../product/hook/useProduct";
 
 function AddProductForm({
   showForm,
@@ -13,12 +14,13 @@ function AddProductForm({
 }: {
   showForm: boolean;
   toggleForm: () => void;
+  setShowForm: (value: boolean) => void;
   editingProduct?: FireStoreProductModel | null;
 }) {
-  const { categories } = useCategory();
-
+  // const { categories } = useCategory();
   const { register, handleSubmit, reset } = useForm<AddProductData>({});
   const { addProductFn, updateProductFn, adding, updating } = useAdmin();
+  const { categories } = useProduct();
 
   useEffect(() => {
     if (editingProduct) {
@@ -58,108 +60,115 @@ function AddProductForm({
     }
   };
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit(async (data) => {
     if (!data.title || !data.categoryId || !data.price) {
-      toast.error("Are sare filed toh add karo ");
+      toast.error("All fields are required");
       return;
     }
 
+    let success = false;
+
     if (editingProduct) {
-      updateProductFn({ ...data, images }, editingProduct.id);
+      success = await updateProductFn({ ...data, images } as any, editingProduct.id);
     } else {
-      addProductFn({ ...data, images });
+      success = await addProductFn({ ...data, images } as any);
     }
 
     console.log("Form Data:", { ...data, images });
-    // setImages([]);
 
-    setTimeout(() => {
-      toggleForm();
-      reset({
-        title: "",
-        price: null,
-        description: "",
-        categoryId: 1,
-      });
-    }, 500);
+    if (success) {
+      setTimeout(() => {
+        toggleForm();
+        reset({
+          title: "",
+          price: null,
+          description: "",
+          categoryId: 1,
+        });
+      }, 500);
+    }
   });
 
   return (
     <div
-      className={`fixed top-0 right-0 left-0 bottom-0 flex z-100  justify-end transition-opacity duration-200 ${showForm ? "" : "bg-transparent pointer-events-none"}`}
+      className={`fixed inset-0 flex z-50 justify-end transition-all duration-300 ${showForm ? "bg-slate-900/40 backdrop-blur-sm" : "bg-transparent pointer-events-none"}`}
     >
       <div
-        className={`bg-white shadow transition-transform duration-500 w-full md:w-1/2 ${showForm ? "translate-x-0" : "translate-x-full"}`}
+        className={`bg-white shadow-2xl h-full transition-transform duration-300 w-full md:w-[500px] flex flex-col ${showForm ? "translate-x-0" : "translate-x-full"}`}
       >
-        <div
-          className=" flex font-semibold justify-start items-center cursor-pointer p-2 hover:font-bold  duration-300"
-          onClick={toggleForm}
-        >
-          <FiX size={20} />
-          <p>Close</p>
+        <div className="flex justify-between items-center p-6 border-b border-slate-100">
+          <h2 className="text-xl font-bold text-slate-800">
+            {editingProduct ? "Edit Product" : "Add New Product"}
+          </h2>
+          <button
+            className="p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-full transition-colors"
+            onClick={toggleForm}
+          >
+            <FiX size={24} />
+          </button>
         </div>
         <form
-          action=""
-          className="w-full p-4 overflow-y-auto h-full"
+          className="w-full flex-1 overflow-y-auto p-6 space-y-6"
           onSubmit={onSubmit}
         >
-          <div className="mb-6">
-            <label>
-              <p className="text-xl font-semibold ">Title</p>
-              <input
-                type="text"
-                placeholder="Product title"
-                className="border  w-full p-2"
-                // required
-                {...register("title")}
-              />
+          <div>
+            <label className="block mb-2 text-sm font-semibold text-slate-700">
+              Product Title
             </label>
+            <input
+              type="text"
+              placeholder="e.g. Classic White Sneakers"
+              className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+              {...register("title")}
+            />
           </div>
-          <div className="mb-6">
-            <label>
-              <p className="text-xl font-semibold ">Price</p>
-              <input
-                type="number"
-                placeholder="Product price"
-                className="border  w-full p-2"
-                // required
-                {...register("price")}
-              />
+          <div>
+            <label className="block mb-2 text-sm font-semibold text-slate-700">
+              Price ($)
             </label>
+            <input
+              type="number"
+              placeholder="0.00"
+              className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+              {...register("price")}
+            />
           </div>
-          <div className="mb-6">
-            <label>
-              <p className="text-xl font-semibold ">Description</p>
-              <input
-                type="text"
-                placeholder="Product Description"
-                className="border  w-full p-2"
-                {...register("description")}
-              />
+          <div>
+            <label className="block mb-2 text-sm font-semibold text-slate-700">
+              Description
             </label>
+            <textarea
+              placeholder="Describe the product..."
+              className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all min-h-[100px] resize-y"
+              {...register("description")}
+            />
           </div>
-          <div className="mb-6">
-            <label htmlFor="title">
-              <p className="text-xl font-semibold ">Category</p>
-              <select
-                id=""
-                className="border  w-full p-2"
-                {...register("categoryId")}
-              >
-                {categories.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
+          <div>
+            <label className="block mb-2 text-sm font-semibold text-slate-700">
+              Category
             </label>
+            <select
+              className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all bg-white"
+              {...register("categoryId")}
+            >
+              <option value="1">Uncategorized</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
           </div>
-          <div className="mb-6">
-            <p className="text-xl font-semibold mb-3">Product Images</p>
+          <div>
+            <p className="block mb-3 text-sm font-semibold text-slate-700">
+              Product Images
+            </p>
             <div className="flex flex-wrap gap-4">
-              <label className="w-24 h-24 border-2 border-dashed border-gray-400 rounded flex justify-center items-center flex-col cursor-pointer hover:border-gray-600 transition">
-                <FiImage size={24} />
-                <p className="text-xs text-center">Upload</p>
+              <label className="w-24 h-24 border-2 border-dashed border-slate-300 bg-slate-50 text-slate-500 rounded-xl flex justify-center items-center flex-col cursor-pointer hover:bg-slate-100 hover:border-indigo-400 hover:text-indigo-600 transition-all">
+                <FiImage size={24} className="mb-1" />
+                <p className="text-[10px] font-medium uppercase tracking-wide">
+                  Upload
+                </p>
                 <input
                   type="file"
                   hidden
@@ -171,7 +180,7 @@ function AddProductForm({
               {images.map((img, idx) => (
                 <div
                   key={idx}
-                  className="relative w-24 h-24 border rounded overflow-hidden"
+                  className="relative w-24 h-24 rounded-xl overflow-hidden group shadow-sm border border-slate-200"
                 >
                   <img
                     src={img}
@@ -180,7 +189,7 @@ function AddProductForm({
                   />
                   <button
                     type="button"
-                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded hover:bg-red-600"
+                    className="absolute top-1 right-1 bg-white/90 text-red-500 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 shadow-sm hover:bg-red-50 hover:text-red-600 transition-all backdrop-blur-sm"
                     onClick={() =>
                       setImages(images.filter((_, i) => i !== idx))
                     }
@@ -191,18 +200,28 @@ function AddProductForm({
               ))}
             </div>
           </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 my-4 mb-10 py-2 text-white font-semibold  hover:bg-blue-600 duration-300 active:bg-blue-700"
-          >
-            {adding || updating
-              ? editingProduct
-                ? "Update ho raha hai wait...."
-                : "Add ho raha hai wait...."
-              : editingProduct
-                ? "Update Product"
-                : "Add Product"}
-          </button>
+          <div className="p-6 border-t border-slate-100 bg-slate-50">
+            <button
+              type="submit"
+              disabled={adding || updating}
+              className={`w-full py-3.5 rounded-xl text-white font-semibold flex justify-center items-center transition-all duration-300 ${
+                adding || updating
+                  ? "bg-slate-400 cursor-not-allowed"
+                  : "bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98]"
+              }`}
+            >
+              {adding || updating ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>{editingProduct ? "Updating..." : "Saving..."}</span>
+                </div>
+              ) : editingProduct ? (
+                "Save Changes"
+              ) : (
+                "Publish Product"
+              )}
+            </button>
+          </div>
         </form>
       </div>
     </div>
