@@ -1,9 +1,9 @@
 import type { Timestamp } from "firebase/firestore";
-import type { Product } from "../../product/types";
+import type { Product } from "../product/productTypes";
 
 export interface CartData {
     product: Product;
-    sizes: string ;
+    sizes: string;
     quantity: number;
     createdAt?: Timestamp
     updatedAt?: Timestamp
@@ -36,7 +36,7 @@ export interface AddToCartData {
     sizes: string;
 }
 
-export interface ItemRemoveData{
+export interface ItemRemoveData {
     uid: string;
     slug: string;
     sizes: string;

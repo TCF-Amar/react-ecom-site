@@ -1,8 +1,8 @@
 import toast from "react-hot-toast";
 
 import { useCallback, useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../../app/hooks";
-import { useAuth } from "../../auth/hooks/useAuth";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useAuth } from "../auth/hooks/useAuth";
 import {
   fetchCartData,
   addToCart,
@@ -11,13 +11,17 @@ import {
   // updateCartItemQty,
   removeItemFromCart,
   clearCart,
-} from "../slices/cartSlices";
-import type { Product } from "../../product/types";
+} from "./cartSlices";
+import type { Product } from "../product/productTypes";
 import { createSelector } from "@reduxjs/toolkit";
-import type { RootState } from "../../../app/store";
-import { useDebounce } from "../../../shared/hooks/useDebounce";
-import type { AddToCartData,  CartUpdateData } from "../types";
-import { clearCartAllItems, removeProductFromCart, updateQty } from "../services/firebaseCartServices";
+import type { RootState } from "../../app/store";
+import { useDebounce } from "../../shared/hooks/useDebounce";
+import type { AddToCartData, CartUpdateData } from "./cartTypes";
+import {
+  clearCartAllItems,
+  removeProductFromCart,
+  updateQty,
+} from "./firebaseCartServices";
 
 const selectTotalItems = createSelector(
   (state: RootState) => state.cart.items,
@@ -54,7 +58,7 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
       quantity,
       sizes,
     };
-    if ( product.category.slug === "clothes"  && sizes === ""  ) {
+    if (product.category.slug === "clothes" && sizes === "") {
       console.log("Size Must be required");
       toast.error("Size Toh select karo ");
 
@@ -81,7 +85,6 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
     setQuantity((prev) => prev - 1);
   };
 
-
   const handleIncrement = (slug: string, sizes: string) => {
     dispatch(incrementCartItem({ slug, sizes }));
     const item = items.find(
@@ -98,10 +101,10 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
       (i) => i.product.slug === slug && i.sizes === sizes,
     );
     if (!item || item.quantity <= 1) {
-      const confirmation = confirm(" Delete Karna Hai kya item", );
+      const confirmation = confirm(" Delete Karna Hai kya item");
       if (confirmation) {
         dispatch(removeItemFromCart({ slug, sizes }));
-        toast.success("Delete Kar Diya LOL")
+        toast.success("Delete Kar Diya LOL");
       }
 
       return;
@@ -133,29 +136,25 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
     update();
   }, [debouncedQty]);
 
-
-  const removeItemFromCartFn = async (slug:string, sizes:string) => {
+  const removeItemFromCartFn = async (slug: string, sizes: string) => {
     const confirmation = confirm(" Delete Karna Hai kya item");
     if (confirmation) {
       dispatch(removeItemFromCart({ slug, sizes }));
-      await removeProductFromCart({uid: user!.uid,slug , sizes  })
+      await removeProductFromCart({ uid: user!.uid, slug, sizes });
       toast.success("Delete Kar Diya LOL");
     }
-    
-    
-  }
+  };
 
   const cartClear = async () => {
     const confirmation = confirm("Sach main pura cart khali karna hai");
     if (confirmation) {
       dispatch(clearCart());
-      await clearCartAllItems(items, user!.uid)
+      await clearCartAllItems(items, user!.uid);
       toast.success("Lo fir kar diya khali");
     } else {
       toast("Theek fir nahi kar raha khali");
-      
     }
-  }
+  };
   const cartClearCheckout = async () => {
     dispatch(clearCart());
     await clearCartAllItems(items, user!.uid);

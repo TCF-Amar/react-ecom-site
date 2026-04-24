@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { AddToCartData, CartData, CartState } from "../types";
-import { addProductInCart, getCartProducts } from "../services/firebaseCartServices";
+import type { AddToCartData, CartData, CartState } from "./cartTypes";
+import { addProductInCart, getCartProducts } from "./firebaseCartServices";
 import { Timestamp } from "firebase/firestore";
 
 
@@ -31,7 +31,7 @@ export const addToCart = createAsyncThunk<
     async ({ uid, product, quantity, sizes }, { rejectWithValue }) => {
         try {
 
-            const cartData: CartData = { product, quantity, sizes ,createdAt: Timestamp.now()};
+            const cartData: CartData = { product, quantity, sizes, createdAt: Timestamp.now() };
             await addProductInCart(uid, product.slug, cartData);
 
             return cartData;
@@ -72,7 +72,7 @@ export const cartSlice = createSlice({
             if (item.quantity > 1) {
                 item.quantity -= 1;
             }
-            
+
         },
 
         removeItemFromCart(state, action: PayloadAction<{ slug: string; sizes: string }>) {
@@ -87,7 +87,7 @@ export const cartSlice = createSlice({
         },
         clearCart(state) {
             state.items = []
-            
+
         }
 
 
@@ -125,18 +125,18 @@ export const cartSlice = createSlice({
                 state.loading = false;
                 state.error = "Something went Wrong"
             })
-            // .addCase(updateCartItemQty.pending, (state) => {
-            //     // state.loading = true;
-            //     state.error = null;
-            // })
-            // .addCase(updateCartItemQty.fulfilled, (state) => {
-            //     state.loading = false;
-            //     // state.error = null;
-            // })
-            // .addCase(updateCartItemQty.rejected, (state) => {
-            //     state.loading = false;
-            //     state.error = "Something went wrong";
-            // })
+        // .addCase(updateCartItemQty.pending, (state) => {
+        //     // state.loading = true;
+        //     state.error = null;
+        // })
+        // .addCase(updateCartItemQty.fulfilled, (state) => {
+        //     state.loading = false;
+        //     // state.error = null;
+        // })
+        // .addCase(updateCartItemQty.rejected, (state) => {
+        //     state.loading = false;
+        //     state.error = "Something went wrong";
+        // })
 
     }
 

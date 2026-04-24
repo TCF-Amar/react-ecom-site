@@ -1,6 +1,6 @@
 import { collection, deleteDoc, doc, getDoc, getDocs, increment, orderBy, query, setDoc, updateDoc } from "firebase/firestore"
-import { db } from "../../../config/firebaseConfigure"
-import type { CartData, CartUpdateData, ItemRemoveData } from "../types";
+import { db } from "../../config/firebaseConfigure"
+import type { CartData, CartUpdateData, ItemRemoveData } from "./cartTypes";
 
 
 export const getCartProducts = async (userId: string) => {
