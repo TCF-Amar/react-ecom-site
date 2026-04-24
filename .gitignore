@@ -22,7 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-seedProducts.ts
-playSound.ts
-SeedProducts.tsx
-data.ts
+# seedProducts.ts
+# playSound.ts
+# SeedProducts.tsx
+# data.ts
