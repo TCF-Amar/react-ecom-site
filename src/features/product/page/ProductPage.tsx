@@ -1,61 +1,44 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Breadcrumb from "../../../shared/components/Breadcrumb";
 import ProductCard from "../components/ProductCard";
 import { useProduct } from "../hook/useProduct";
-import type { Product } from "../types";
 import { FiFilter } from "react-icons/fi";
+import ProductCardSkeleton from "../../../shared/components/Loader/ProductCardSkeleton";
 
 function ProductPage() {
-  const {  allProducts, categories } = useProduct();
+  const { products, categories, loading, setCategoryId, categoryId } =
+    useProduct();
   const [sortOption, setSortOption] = useState<string | null>(null);
-
-  const [currentCategories, setCurrentCategories] = useState<string[]>([]);
-  const [listProducts, setListProducts] = useState<Product[]>([]);
   const [showMore, setShowMore] = useState<boolean>(false);
-
   const [showFilter, setShowFilter] = useState(false);
 
   const handelSelectCat = (e: HTMLInputElement) => {
     const { value, checked } = e;
-    setCurrentCategories((prev) =>
-      checked ? [...prev, value] : prev.filter((c) => c !== value),
-    );
+
+    setCategoryId(checked ? Number(value) : null);
   };
 
-  const filterProducts = () => {
-    let filtered = [...allProducts];
+  const handleClearFilters = () => {
+    setCategoryId(null);
+  };
 
-    if (currentCategories.length > 0) {
-      filtered = filtered.filter((p) =>
-        currentCategories.includes(p.category?.slug ?? ""),
+  const sortedProducts = [...products];
+
+  switch (sortOption) {
+    case "lth":
+      sortedProducts.sort((a, b) => a.price - b.price);
+      break;
+    case "htl":
+      sortedProducts.sort((a, b) => b.price - a.price);
+      break;
+    case "nf":
+      sortedProducts.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
-    }
+      break;
+  }
 
-    switch (sortOption) {
-      case "lth":
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case "htl":
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case "nf":
-        filtered.sort(
-          (a, b) =>
-            new Date(b.creationAt).getTime() - new Date(a.creationAt).getTime(),
-        );
-        break;
-      case "rlt":
-      default:
-        break;
-    }
-    console.log(filtered.length);
-
-    setListProducts(filtered);
-  };
-
-  useEffect(() => {
-    filterProducts();
-  }, [sortOption, allProducts, currentCategories]);
   return (
     <>
       <Breadcrumb />
@@ -76,15 +59,15 @@ function ProductPage() {
           <div className="sticky top-20">
             <div className="flex justify-between ">
               <p className="uppercase font-bold py-4 s">Filters</p>
-              {currentCategories.length > 0 && (
-                <button type="button" onClick={() => setCurrentCategories([])}>
+              {categoryId !== null && (
+                <button type="button" onClick={handleClearFilters}>
                   <p className="text-red-500 font-semibold cursor-pointer">
                     Clear Filters
                   </p>
                 </button>
               )}
             </div>
-            <div className="border border-black/40 flex flex-col px-4 pt-4 relative pb-8">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col px-5 pt-5 relative pb-8">
               <p className="uppercase font-semibold pb-4">Categories</p>
               <div
                 className={` max-h-125 overflow-hidden overflow-y-auto py-4 hide-scroll `}
@@ -94,14 +77,15 @@ function ProductPage() {
                       <div key={idx} className="flex gap-3">
                         <input
                           type="checkbox"
-                          value={cat.slug}
+                          value={cat.id}
                           id={cat.slug}
-                          checked={currentCategories.includes(cat.slug)}
+                          checked={cat.id === categoryId}
                           onChange={(e) => handelSelectCat(e.target)}
+                          className="accent-indigo-600 cursor-pointer w-4 h-4 mt-1"
                         />
                         <label
                           htmlFor={cat.slug}
-                          className="cursor-pointer text-base font-semibold capitalize"
+                          className="cursor-pointer text-[15px] font-medium text-slate-700 hover:text-indigo-600 transition-colors capitalize"
                         >
                           {cat.name}
                         </label>
@@ -111,26 +95,29 @@ function ProductPage() {
                       <div key={idx} className="flex gap-3">
                         <input
                           type="checkbox"
-                          value={cat.slug}
+                          value={cat.id}
                           id={cat.slug}
-                          checked={currentCategories.includes(cat.slug)}
+                          checked={cat.id === categoryId}
                           onChange={(e) => handelSelectCat(e.target)}
+                          className="accent-indigo-600 cursor-pointer w-4 h-4 mt-1"
                         />
                         <label
                           htmlFor={cat.slug}
-                          className="cursor-pointer text-base font-semibold capitalize"
+                          className="cursor-pointer text-[15px] font-medium text-slate-700 hover:text-indigo-600 transition-colors capitalize"
                         >
                           {cat.name}
                         </label>
                       </div>
                     ))}
               </div>
-              <button
-                onClick={() => setShowMore(!showMore)}
-                className="text-sm font-bold absolute bottom-2 right-3 hover:scale-[1px]"
-              >
-                {!showMore ? "Show More" : "Show less"}
-              </button>
+              {categories.length > 6 && (
+                <button
+                  onClick={() => setShowMore(!showMore)}
+                  className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 absolute bottom-3 right-4 transition-colors"
+                >
+                  {!showMore ? "Show More" : "Show less"}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -141,11 +128,7 @@ function ProductPage() {
                 className="flex gap-2"
                 onClick={() => setShowFilter(!showFilter)}
               >
-                {/* {showFilter ? (
-                  <FiX size={24} className=" md:hidden" />
-                ) : ( */}
                 <FiFilter size={24} className=" md:hidden" />
-                {/* )} */}
                 <p className="uppercase font-semibold ">Filter</p>
               </button>
             </div>
@@ -153,7 +136,7 @@ function ProductPage() {
             <select
               name="sort"
               id=""
-              className="border p-2 px-4  rounded-none active:border-none outline-0"
+              className="bg-white border border-slate-200 text-slate-700 p-2.5 px-4 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none shadow-sm cursor-pointer hover:border-slate-300 transition-all text-sm font-medium"
               onChange={(e) => {
                 setSortOption(e.target.value);
               }}
@@ -174,10 +157,13 @@ function ProductPage() {
                 >
                   Close
                 </p>
-                {currentCategories.length > 0 && (
+                {categoryId !== null && (
                   <button
                     type="button"
-                    onClick={() => setCurrentCategories([])}
+                    onClick={() => {
+                      handleClearFilters();
+                      setShowFilter(false);
+                    }}
                   >
                     <p className="text-red-500 font-semibold cursor-pointer">
                       Clear Filters
@@ -185,20 +171,21 @@ function ProductPage() {
                   </button>
                 )}
               </div>
-              <div className="border border-black/40 flex flex-col p-4 w-full max-h-100 overflow-hidden overflow-y-auto  ">
+              <div className="bg-white rounded-xl shadow-sm border border-slate-100 flex flex-col p-5 w-full max-h-100 overflow-hidden overflow-y-auto mt-4">
                 <p className="uppercase font-semibold pb-4">Categories</p>
                 {categories.map((cat, idx) => (
                   <div key={idx} className="flex gap-3">
                     <input
                       type="checkbox"
-                      value={cat.slug}
-                      id={cat.slug}
-                      checked={currentCategories.includes(cat.slug)}
+                      value={cat.id}
+                      id={`mobile-${cat.slug}`}
+                      checked={cat.id === categoryId}
                       onChange={(e) => handelSelectCat(e.target)}
+                      className="accent-indigo-600 cursor-pointer w-4 h-4 mt-1"
                     />
                     <label
-                      htmlFor={cat.slug}
-                      className="cursor-pointer text-base font-semibold capitalize line-clamp-1 "
+                      htmlFor={`mobile-${cat.slug}`}
+                      className="cursor-pointer text-[15px] font-medium text-slate-700 hover:text-indigo-600 transition-colors capitalize line-clamp-1"
                     >
                       {cat.name}
                     </label>
@@ -207,18 +194,25 @@ function ProductPage() {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 ">
-            {listProducts!.length > 0 ? (
-              listProducts?.map((p, index) => (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4  ">
+            {sortedProducts!.length > 0 ? (
+              sortedProducts?.map((p, index) => (
                 <ProductCard key={index} product={p} />
               ))
             ) : (
-              <div className="flex justify-center items-center h-10 w-full  col-span-6">
-                <p>Product not found</p>
-              </div>
+              <></>
             )}
           </div>
-        
+
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {loading &&
+              [...Array(12)].map((_, idx) => <ProductCardSkeleton key={idx} />)}
+          </div>
+          {!loading && sortedProducts!.length === 0 && (
+            <div className="flex justify-center items-center h-10 w-full  col-span-6">
+              <p>Product not found</p>
+            </div>
+          )}
         </div>
       </div>
     </>
