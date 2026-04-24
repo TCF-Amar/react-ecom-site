@@ -1,10 +1,9 @@
 import { useEffect } from "react"
-import { useAuth } from "../../auth/hooks/useAuth"
-import { useAppDispatch, useAppSelector } from "../../../app/hooks"
-import { addProduct, fetchMyProducts } from "../slices"
-import type { AddProductData } from "../types"
+import { useAuth } from "../auth/hooks/useAuth"
+import { useAppDispatch, useAppSelector } from "../../app/hooks"
+import { addProduct, fetchMyProducts } from "./adminSlice"
 
-import { updateProduct, deleteProduct } from "../slices";
+import { updateProduct, deleteProduct } from "./adminSlice";
 import toast from "react-hot-toast"
 
 export const useAdmin = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
@@ -13,14 +12,24 @@ export const useAdmin = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => 
 
     const { myProducts, loading, error, adding, updating, deleting } = useAppSelector(state => state.admin)
 
-    const addProductFn = async (product: AddProductData) => {
-        if (!user?.uid) return
-        dispatch(addProduct({ product, uid: user.uid }))
+    const addProductFn = async (product: any) => {
+        if (!user?.uid) return false;
+        try {
+            await dispatch(addProduct({ product, uid: user.uid })).unwrap();
+            return true;
+        } catch (err) {
+            return false;
+        }
     }
 
-    const updateProductFn = async (product: Partial<AddProductData>, productId: number) => {
-        if (!user?.uid) return
-        dispatch(updateProduct({ product, productId, uid: user.uid }))
+    const updateProductFn = async (product: any, productId: number) => {
+        if (!user?.uid) return false;
+        try {
+            await dispatch(updateProduct({ product, productId, uid: user.uid })).unwrap();
+            return true;
+        } catch (err) {
+            return false;
+        }
     }
 
     const deleteProductFn = async (productId: number) => {

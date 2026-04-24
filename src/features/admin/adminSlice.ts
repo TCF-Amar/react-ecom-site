@@ -1,16 +1,26 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
-import { getMyProducts, addProduct as addProductAPI, updateProduct as updateProductAPI, deleteProduct as deleteProductAPI } from "../services/adminApiServices";
-import type { AddProductData, FireStoreProductModel } from "../types";
+import { getMyProducts, addProduct as addProductAPI, updateProduct as updateProductAPI, deleteProduct as deleteProductAPI } from "./adminApiServices";
+import type {  AddProductModel, FireStoreProductModel } from "./adminTypes";
 import toast from "react-hot-toast";
 
 export const fetchMyProducts = createAsyncThunk(
     'admin/fetchMyProducts',
-    async (uid: string) => getMyProducts(uid)
+    async (uid: string) => getMyProducts(uid),
+    {
+        condition: (_, { getState }) => {
+            const state = getState() as any;
+            const { myProducts, loading } = state.admin;
+            if (myProducts.length > 0 || loading) {
+                return false; // Cancel execution if already fetched or loading
+            }
+            return true;
+        }
+    }
 );
 
 export const addProduct = createAsyncThunk(
     'admin/addProduct',
-    async ({ product, uid }: { product: AddProductData; uid: string }) => {
+    async ({ product, uid }: { product: AddProductModel; uid: string }) => {
         const res = await addProductAPI(product, uid);
         return res.firestoreProduct;
     }
@@ -18,7 +28,7 @@ export const addProduct = createAsyncThunk(
 
 export const updateProduct = createAsyncThunk(
     'admin/updateProduct',
-    async ({ product, productId, uid }: { product: Partial<AddProductData>; productId: number; uid: string }) => {
+    async ({ product, productId, uid }: { product: Partial<AddProductModel>; productId: number; uid: string }) => {
         const res = await updateProductAPI(product, productId, uid);
         return res.firestoreProduct;
     }

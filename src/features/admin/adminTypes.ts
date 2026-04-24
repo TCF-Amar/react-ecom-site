@@ -1,4 +1,5 @@
 import type { Timestamp } from "firebase/firestore";
+import type { Category } from "../product/productTypes";
 
 export interface AddProductData {
     title: string;
@@ -15,6 +16,16 @@ export interface FireStoreProductModel {
     description: string
     categoryId: number;
     images: string[];
-    createdAt: Timestamp
-    updatedAt: Timestamp
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface AddProductModel {
+    title: string;
+    price: number;
+    description: string;
+    category: Category;
+    images: string[];
+    updatedAt: Timestamp;
+    createdAt?: Timestamp;
 }
