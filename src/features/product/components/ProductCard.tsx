@@ -1,6 +1,6 @@
 import React from "react";
 import { FiHeart, FiStar } from "react-icons/fi";
-import type { Product } from "../types";
+import type { Product } from "../productTypes";
 import { images } from "../../../constants/images";
 import { Link } from "react-router-dom";
 
@@ -9,13 +9,10 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const rating = Math.floor(Math.random() * 5) + 1;
-  const ratingCount = Math.floor(Math.random() * 500) + 1;
-
   return (
     <Link
       to={`/products/${product.slug}`}
-      className="group cursor-pointer w-full relative flex flex-col bg-white  overflow-hidden  transition-all duration-500 ease-out border border-slate-100 h-full"
+      className="group cursor-pointer w-full relative flex flex-col bg-white rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out border border-slate-50 h-full overflow-hidden"
     >
       <div className="relative aspect-4/5 overflow-hidden bg-slate-50">
         <img
@@ -51,13 +48,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <FiStar
                 key={i}
                 size={12}
-                fill={i < rating ? "currentColor" : "none"}
-                className={i < rating ? "" : "text-slate-200"}
+                fill={i < product.rating ? "currentColor" : "none"}
+                className={i < product.rating ? "" : "text-slate-200"}
               />
             ))}
           </div>
           <span className="text-[11px] font-medium text-slate-400">
-            ({ratingCount})
+            ({product.reviewCount})
           </span>
         </div>
 

@@ -1,35 +1,48 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { fetchProductBySlug, fetchRelatedProduct } from "../services/productFirebaseServices";
-import type { Product } from "../types";
+import { addOrUpdateReview, fetchProductBySlugFromFirestore, fetchRelatedProductsFromFirestore } from "../productFirebaseServices";
+import type { Product, Review } from "../productTypes";
+import { useAuth } from "../../auth/hooks/useAuth";
+import toast from "react-hot-toast";
 
 export const useProductDetails = () => {
+    const { user } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const [product, setProduct] = useState<Product | null>(null);
-    const [relatedProduct, setRelatedProduct] = useState<Product[] | []>([]);
+    const [relatedProduct, setRelatedProduct] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
+    const [selectedStar, setSelectedStar] = useState(0);
+    const [comment, setComment] = useState("");
 
 
     const [slug, setSlug] = useState<string | null>(
         location.pathname.split("/").findLast(Boolean) as string,
     );
 
+
+    const fetchRelatedProduct = async () => {
+        const relatedData = await fetchRelatedProductsFromFirestore({
+            categoryId: product?.category?.id || null,
+
+        });
+
+        setRelatedProduct(relatedData);
+    }
+
     const fetProduct = async () => {
 
         setLoading(true);
         try {
-            
-            const data = await fetchProductBySlug(slug);
-            const relatedData = await fetchRelatedProduct(slug);
-            
-            setRelatedProduct(relatedData);
+
+            const data = await fetchProductBySlugFromFirestore(slug?.toString() || "");
+            fetchRelatedProduct();
             setProduct(data);
             setLoading(false);
         } catch (error: unknown) {
             console.log(error);
-            
-            
+
+
         } finally {
             setLoading(false);
         }
@@ -38,13 +51,12 @@ export const useProductDetails = () => {
     useEffect(() => {
         setSlug(location.pathname.split("/").findLast(Boolean) as string);
         console.log(slug);
-        
-            
+
+
         fetProduct();
     }, [slug, location.pathname]);
     const pImages = product?.images || [];
 
-    // form mobile
     const [currentIdx, setCurrentIdx] = useState(0);
 
     const nextImg = () => {
@@ -60,6 +72,61 @@ export const useProductDetails = () => {
         }
     };
 
+    const addReviews = async () => {
+        try {
+            if (!user) {
+                navigate("/login");
+                return;
+            }
+            if (selectedStar === 0) {
+                toast.error("Please select a star rating before submitting your review.");
+                return;
+            }
+            if (!comment.trim()) {
+                toast.error("Please write your review before submitting.");
+                return;
+            }
+            if (!product) {
+                toast.error("Product not found.");
+                return;
+            }
+
+            const review: Review = {
+                id: Date.now().toString(),
+                productId: product.id,
+                comment: comment.trim(),
+                userId: user!.uid,
+                userName: user?.displayName || "John Doe",
+                rating: selectedStar,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                isEdited: false,
+                isDeleted: false
+            }
+            const updatedProductRating = await addOrUpdateReview(review)
+            setProduct((prev) =>
+                prev
+                    ? {
+                        ...prev,
+                        rating: updatedProductRating.rating,
+                        reviewCount: updatedProductRating.reviewCount,
+                    }
+                    : prev
+            );
+            setSelectedStar(0);
+            setComment("");
+            toast.success(
+                updatedProductRating.type === "edited"
+                    ? "Review updated successfully."
+                    : "Review submitted successfully."
+            );
+
+        } catch (error) {
+            console.error("Error adding review:", error);
+            toast.error("Failed to submit review.");
+        }
+    }
+
     return {
         navigate,
         relatedProduct,
@@ -68,6 +135,7 @@ export const useProductDetails = () => {
         loading,
         nextImg,
         prevImg,
-        product
+        product, selectedStar, setSelectedStar, addReviews, comment,
+        setComment,
     }
 }

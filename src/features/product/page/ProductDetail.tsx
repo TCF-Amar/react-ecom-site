@@ -1,9 +1,16 @@
 import Breadcrumb from "../../../shared/components/Breadcrumb";
 import { images } from "../../../constants/images";
-import { FiChevronLeft, FiChevronRight, FiMinus, FiPlus } from "react-icons/fi";
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiMinus,
+  FiPlus,
+  FiStar,
+} from "react-icons/fi";
 import ProductCard from "../components/ProductCard";
 import { useProductDetails } from "../hook/useProductDetails";
-import { useCart } from "../../cart/hooks/useCart";
+import ProductDetailSkeleton from "../../../shared/components/Loader/ProductDetailSkeleton";
+import { useCart } from "../../cart/useCart";
 
 function ProductDetail() {
   const {
@@ -15,34 +22,33 @@ function ProductDetail() {
     pImages,
     currentIdx,
     product,
+    selectedStar,
+    setSelectedStar,
+    addReviews,
+    comment,
+    setComment,
   } = useProductDetails();
   const {
     isTimeStart,
     addCartFn,
-     incQty,
-     decQty,
+    incQty,
+    decQty,
     quantity,
     sizes,
     setSizes,
     setQuantity,
-    setTimeStart
+    setTimeStart,
   } = useCart();
 
-const sizeArray = ["XS","S","M","L","XL", "XXL"]
-
-
+  const sizeArray = ["XS", "S", "M", "L", "XL", "XXL"];
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-100">
-        <p className="text-2xl text-black/50">Ruko jara sabar karo</p>
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
   if (product == null) {
     return (
       <div className="flex flex-col gap-3 justify-center items-center h-100">
-        <p className="text-2xl text-black/50">Product Nahi mila</p>
+        <p className="text-2xl text-black/50">Product Not Found</p>
         <button
           onClick={() => navigate(-1)}
           className=" flex gap-3 justify-center items-center text-xl bg-slate-900 text-white p-2 pr-4"
@@ -113,30 +119,33 @@ const sizeArray = ["XS","S","M","L","XL", "XXL"]
         </div>
         <div className=" flex gap-2 ">
           {/* desktop */}
-          <div className="flex-2 hidden md:block h-">
+          <div className="flex-2 hidden md:block h-fit sticky top-24">
             {pImages.length === 1 ? (
-              <div className="h-100 overflow-hidden">
-                <div className="w-full h-full border transition-all duration-300 ease-in-out">
+              <div className="h-100 overflow-hidden rounded-2xl shadow-sm bg-slate-50">
+                <div className="w-full h-full transition-all duration-300 ease-in-out">
                   <img
                     src={pImages[0]}
                     alt=""
-                    className="w-full h-full object-cover object-center "
+                    className="w-full h-full object-cover object-center"
                   />
                 </div>
               </div>
             ) : pImages.length >= 1 ? (
-              <div className="h-100 overflow-hidden flex gap-2 relative">
+              <div className="h-100 flex gap-4 relative">
                 {[...Array(2)].map((_, idx) => (
-                  <div className="h-full w-full relative overflow-hidden">
+                  <div
+                    key={idx}
+                    className="h-full w-full relative overflow-hidden rounded-2xl shadow-sm bg-slate-50"
+                  >
                     <div
-                      className={`flex justify-center items-center text-2xl cursor-pointer ${pImages.length > 2 && idx == 1 ? "absolute top-0 left-0 right-0 bottom-0 bg-gray-500/20 z-10 h-100" : "hidden"}`}
+                      className={`flex justify-center items-center text-2xl cursor-pointer transition-all ${pImages.length > 2 && idx == 1 ? "absolute inset-0 bg-black/40 text-white font-medium z-10" : "hidden"}`}
                     >
                       <FiPlus /> {pImages.length - 1}
                     </div>
                     <img
                       src={product?.images[idx]}
                       alt={idx.toString()}
-                      className={`object-cover h-full w-full cursor-pointer border border-black/20`}
+                      className={`object-cover h-full w-full cursor-pointer hover:scale-105 transition-transform duration-500`}
                       onError={(e) => {
                         e.currentTarget.src = images.productDefault;
                       }}
@@ -145,12 +154,12 @@ const sizeArray = ["XS","S","M","L","XL", "XXL"]
                 ))}
               </div>
             ) : (
-              <div className="h-100 overflow-hidden">
-                <div className="w-full h-full border">
+              <div className="h-100 overflow-hidden rounded-2xl shadow-sm bg-slate-50">
+                <div className="w-full h-full">
                   <img
                     src={images.productDefault}
                     alt=""
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain p-8"
                   />
                 </div>
               </div>
@@ -159,38 +168,37 @@ const sizeArray = ["XS","S","M","L","XL", "XXL"]
 
           {/* mobile */}
 
-          <div
-            className={`flex-1 flex flex-col `}
-          >
-            <div className={`flex h-fit gap-2 p-2 border border-black/40 items-center `}>
+          <div className={`flex-1 flex flex-col gap-6 md:pl-8`}>
+            <div
+              className={`flex h-fit gap-3 px-4 py-2 bg-slate-100 rounded-full items-center w-fit`}
+            >
               <img
                 src={product?.category.image}
                 alt={product?.category.name}
-                className="h-10  w-10 object-cover"
+                className="h-8 w-8 rounded-full object-cover shadow-sm"
               />
-              <p className="font-semibold capitalize">
+              <p className="font-medium text-sm text-slate-700 capitalize pr-2">
                 {product?.category.name}
               </p>
             </div>
-            {
-              product.category.slug === "clothes" ?
-                
-            
-                <div className={`flex py-4 gap-3 `}>
-                  {sizeArray.map((s) => (
-                    <button
-                      onClick={() => {
-                        setTimeStart(false);
-                        setSizes(s);
-                      }}
-                      className={`  aspect-square p-3  font-semibold hover:bg-gray-500 transition-all duration-300   text-center flex justify-center items-center ${sizes === s ? "border border-gray-800 text-black" : "bg-slate-900 text-white"}`}
-                    >
-                      <p>{s}</p>
-                    </button>
-                  ))}
-                </div> : <div className="h-10">
-                
-                </div>}
+            {product.category.slug === "clothes" ? (
+              <div className={`flex py-2 gap-3 flex-wrap`}>
+                {sizeArray.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => {
+                      setTimeStart(false);
+                      setSizes(s);
+                    }}
+                    className={`h-12 min-w-12 px-3 rounded-lg font-medium transition-all duration-200 text-center flex justify-center items-center ${sizes === s ? "bg-slate-900 text-white shadow-md scale-105" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
+                  >
+                    <p>{s}</p>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="hidden"></div>
+            )}
             <div className="flex gap-4 items-baseline">
               <p className="text-2xl text-black/60 font-semibold ">
                 ${product?.price}
@@ -199,11 +207,11 @@ const sizeArray = ["XS","S","M","L","XL", "XXL"]
                 ${product?.price}
               </p>
             </div>
-            <div className="">
-              <div className="flex gap-4 py-4">
+            <div className="flex flex-col gap-6 mt-4">
+              <div className="flex items-center gap-4 bg-slate-100 w-fit rounded-xl p-1">
                 <button
                   onClick={decQty}
-                  className="bg-slate-900 w-14 text-3xl text-white flex justify-center items-center active:bg-gray-800"
+                  className="w-12 h-12 rounded-lg bg-white text-xl text-slate-800 flex justify-center items-center hover:shadow-sm transition-all active:scale-95"
                 >
                   <FiMinus />
                 </button>
@@ -213,21 +221,21 @@ const sizeArray = ["XS","S","M","L","XL", "XXL"]
                   min={1}
                   max={100}
                   placeholder="0"
-                  className="w-25 p-3 border text-center "
+                  className="w-16 bg-transparent text-center font-medium text-lg outline-none"
                   onChange={(e) => setQuantity(Number.parseInt(e.target.value))}
                 />
                 <button
                   onClick={incQty}
-                  className="bg-slate-900 w-14 text-3xl text-white flex justify-center items-center active:bg-gray-800"
+                  className="w-12 h-12 rounded-lg bg-white text-xl text-slate-800 flex justify-center items-center hover:shadow-sm transition-all active:scale-95"
                 >
                   <FiPlus />
                 </button>
               </div>
-              <div className=" flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 {isTimeStart ? (
                   <button
                     type="button"
-                    className="bg-slate-900  text-white flex text-center p-3 font-semibold hover:bg-gray-700 transition-all duration-300"
+                    className="flex-1 bg-indigo-600 text-white rounded-xl flex justify-center items-center py-4 font-semibold hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                   >
                     Go To Cart
                   </button>
@@ -235,7 +243,7 @@ const sizeArray = ["XS","S","M","L","XL", "XXL"]
                   <button
                     type="button"
                     onClick={() => addCartFn(product)}
-                    className="bg-slate-900  text-white flex text-center p-3 font-semibold hover:bg-gray-700 transition-all duration-300"
+                    className="flex-1 bg-slate-900 text-white rounded-xl flex justify-center items-center py-4 font-semibold hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                   >
                     Add To Cart
                   </button>
@@ -243,9 +251,9 @@ const sizeArray = ["XS","S","M","L","XL", "XXL"]
                 <button
                   type="button"
                   // onClick={addToCartBtn}
-                  className="bg-slate-900  text-white flex text-center p-3 font-semibold hover:bg-gray-700 transition-all duration-300"
+                  className="flex-1 bg-slate-100 text-slate-900 rounded-xl flex justify-center items-center py-4 font-semibold hover:bg-slate-200 transition-all duration-300"
                 >
-                  Shop at ${product?.price}
+                  Buy Now for ${product?.price}
                 </button>
               </div>
             </div>
@@ -265,12 +273,67 @@ const sizeArray = ["XS","S","M","L","XL", "XXL"]
           Related Products
         </p>
 
-        <div className=" flex  overflow-hidden gap-4  overflow-x-auto">
-          {relatedProduct.map((p) => (
-            <div className=" w-50 ">
-              <ProductCard product={p} />
+        <div className=" flex  overflow-hidden gap-4  overflow-x-auto ">
+          {relatedProduct.map((product, i) => (
+            <div className=" min-w-50 " key={i}>
+              <ProductCard product={product} />
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <p className=" text-xl font-semibold uppercase text-black/80">
+          customer reviews
+        </p>
+        <div className="flex items-center gap-2">
+          {[...Array(5)].map((s: number, i) => (
+            <button key={s}>
+              <FiStar
+                size={20}
+                className={` text-yellow-500 ${i < product?.rating || 0 ? "fill-current" : ""} `}
+              />
+            </button>
+          ))}
+          {product?.rating} ({product?.reviewCount} reviews)
+        </div>
+        <div className="flex items-center gap-4 flex-col">
+          <div className="flex-1 border ">
+            <div>
+              <div className="flex justify-end p-4"></div>
+            </div>
+          </div>
+          <div className="flex-1 bg-white border shadow-2xl w-full md:w-1/2 rounded-xl p-3 flex flex-col gap-4">
+            <div className="flex justify-center gap-2">
+              {[...Array(5)].map((s: number, i) => (
+                <button
+                  key={s}
+                  onClick={() => setSelectedStar(i + 1)}
+                  onDoubleClick={() => setSelectedStar(0)}
+                >
+                  <FiStar
+                    size={20}
+                    className={` text-yellow-500 ${i < selectedStar ? "fill-current" : ""} `}
+                  />
+                </button>
+              ))}
+            </div>
+            <input
+              type="text"
+              placeholder="Write Your review here"
+              value={comment}
+              className="
+              w-full h-24 border rounded-md p-2 outline-none  focus:border transition-all duration-300
+            "
+              onChange={(e)=>setComment(e.target.value)}
+            />
+            <button
+              className="bg-slate-900 text-white py-2 rounded-lg font-medium hover:bg-slate-800 transition-all"
+              onClick={addReviews}
+            >
+              Submit Review
+            </button>
+          </div>
         </div>
       </div>
     </div>
