@@ -23,6 +23,12 @@ export const addProduct = createAsyncThunk(
     async ({ product, uid }: { product: AddProductModel; uid: string }) => {
         const res = await addProductAPI(product, uid);
         return res.firestoreProduct;
+    },
+    {
+        condition: (_, { getState }) => {
+            const state = getState() as any;
+            return !state.admin.adding;
+        }
     }
 );
 
@@ -31,6 +37,12 @@ export const updateProduct = createAsyncThunk(
     async ({ product, productId, uid }: { product: Partial<AddProductModel>; productId: number; uid: string }) => {
         const res = await updateProductAPI(product, productId, uid);
         return res.firestoreProduct;
+    },
+    {
+        condition: (_, { getState }) => {
+            const state = getState() as any;
+            return !state.admin.updating;
+        }
     }
 );
 

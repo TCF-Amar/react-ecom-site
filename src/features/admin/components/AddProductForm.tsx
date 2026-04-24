@@ -1,6 +1,6 @@
 import { FiImage, FiX } from "react-icons/fi";
 // import { useCategory } from "../../product/hook/useCategory";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useAdmin } from "../useAdmin";
@@ -21,6 +21,9 @@ function AddProductForm({
   const { register, handleSubmit, reset } = useForm<AddProductData>({});
   const { addProductFn, updateProductFn, adding, updating } = useAdmin();
   const { categories } = useProduct();
+  const submitLockRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const saving = adding || updating || isSubmitting;
 
   useEffect(() => {
     if (editingProduct) {
@@ -61,31 +64,48 @@ function AddProductForm({
   };
 
   const onSubmit = handleSubmit(async (data) => {
+    if (submitLockRef.current || adding || updating) return;
+
     if (!data.title || !data.categoryId || !data.price) {
       toast.error("All fields are required");
       return;
     }
 
     let success = false;
+    submitLockRef.current = true;
+    setIsSubmitting(true);
 
-    if (editingProduct) {
-      success = await updateProductFn({ ...data, images } as any, editingProduct.id);
-    } else {
-      success = await addProductFn({ ...data, images } as any);
-    }
+    try {
+      if (editingProduct) {
+        success = await updateProductFn(
+          { ...data, images } as any,
+          editingProduct.id,
+        );
+      } else {
+        success = await addProductFn({ ...data, images } as any);
+      }
 
-    console.log("Form Data:", { ...data, images });
+      console.log("Form Data:", { ...data, images });
 
-    if (success) {
-      setTimeout(() => {
-        toggleForm();
-        reset({
-          title: "",
-          price: null,
-          description: "",
-          categoryId: 1,
-        });
-      }, 500);
+      if (success) {
+        setTimeout(() => {
+          toggleForm();
+          reset({
+            title: "",
+            price: null,
+            description: "",
+            categoryId: 1,
+          });
+          submitLockRef.current = false;
+          setIsSubmitting(false);
+        }, 500);
+        return;
+      }
+    } finally {
+      if (!success) {
+        submitLockRef.current = false;
+        setIsSubmitting(false);
+      }
     }
   });
 
@@ -203,14 +223,14 @@ function AddProductForm({
           <div className="p-6 border-t border-slate-100 bg-slate-50">
             <button
               type="submit"
-              disabled={adding || updating}
+              disabled={saving}
               className={`w-full py-3.5 rounded-xl text-white font-semibold flex justify-center items-center transition-all duration-300 ${
-                adding || updating
+                saving
                   ? "bg-slate-400 cursor-not-allowed"
                   : "bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98]"
               }`}
             >
-              {adding || updating ? (
+              {saving ? (
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>{editingProduct ? "Updating..." : "Saving..."}</span>
