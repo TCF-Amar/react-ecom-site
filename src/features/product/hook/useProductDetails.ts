@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { addOrUpdateReview, fetchProductBySlugFromFirestore, fetchRelatedProductsFromFirestore } from "../productFirebaseServices";
+import { addOrUpdateReview, deleteProductReview, fetchProductBySlugFromFirestore, fetchProductReviewsFromFirestore, fetchRelatedProductsFromFirestore } from "../productFirebaseServices";
 import type { Product, Review } from "../productTypes";
 import { useAuth } from "../../auth/hooks/useAuth";
 import toast from "react-hot-toast";
@@ -12,8 +12,11 @@ export const useProductDetails = () => {
     const [product, setProduct] = useState<Product | null>(null);
     const [relatedProduct, setRelatedProduct] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
+    const [reviewsLoading, setReviewsLoading] = useState(false);
     const [selectedStar, setSelectedStar] = useState(0);
     const [comment, setComment] = useState("");
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
 
 
     const [slug, setSlug] = useState<string | null>(
@@ -21,13 +24,26 @@ export const useProductDetails = () => {
     );
 
 
-    const fetchRelatedProduct = async () => {
+    const fetchRelatedProduct = async (categoryId: number | null) => {
         const relatedData = await fetchRelatedProductsFromFirestore({
-            categoryId: product?.category?.id || null,
+            categoryId,
 
         });
 
         setRelatedProduct(relatedData);
+    }
+
+    const fetchReviews = async (productId: string) => {
+        setReviewsLoading(true);
+        try {
+            const productReviews = await fetchProductReviewsFromFirestore(productId);
+            setReviews(productReviews);
+        } catch (error) {
+            console.error("Error fetching reviews:", error);
+            toast.error("Failed to load reviews.");
+        } finally {
+            setReviewsLoading(false);
+        }
     }
 
     const fetProduct = async () => {
@@ -36,8 +52,14 @@ export const useProductDetails = () => {
         try {
 
             const data = await fetchProductBySlugFromFirestore(slug?.toString() || "");
-            fetchRelatedProduct();
             setProduct(data);
+            if (data) {
+                fetchRelatedProduct(data.category?.id || null);
+                fetchReviews(data.id);
+            } else {
+                setRelatedProduct([]);
+                setReviews([]);
+            }
             setLoading(false);
         } catch (error: unknown) {
             console.log(error);
@@ -82,10 +104,7 @@ export const useProductDetails = () => {
                 toast.error("Please select a star rating before submitting your review.");
                 return;
             }
-            if (!comment.trim()) {
-                toast.error("Please write your review before submitting.");
-                return;
-            }
+
             if (!product) {
                 toast.error("Product not found.");
                 return;
@@ -104,6 +123,7 @@ export const useProductDetails = () => {
                 isDeleted: false
             }
             const updatedProductRating = await addOrUpdateReview(review)
+            await fetchReviews(product.id);
             setProduct((prev) =>
                 prev
                     ? {
@@ -115,6 +135,7 @@ export const useProductDetails = () => {
             );
             setSelectedStar(0);
             setComment("");
+            setEditingReviewId(null);
             toast.success(
                 updatedProductRating.type === "edited"
                     ? "Review updated successfully."
@@ -124,6 +145,59 @@ export const useProductDetails = () => {
         } catch (error) {
             console.error("Error adding review:", error);
             toast.error("Failed to submit review.");
+        }
+    }
+
+    const startEditReview = (review: Review) => {
+        setEditingReviewId(review.id);
+        setSelectedStar(review.rating);
+        setComment(review.comment);
+    }
+
+    const cancelEditReview = () => {
+        setEditingReviewId(null);
+        setSelectedStar(0);
+        setComment("");
+    }
+
+    const deleteReview = async (review: Review) => {
+        try {
+            if (!user) {
+                navigate("/login");
+                return;
+            }
+            if (!product) {
+                toast.error("Product not found.");
+                return;
+            }
+            if (review.userId !== user.uid) {
+                toast.error("You can delete only your own review.");
+                return;
+            }
+
+            const confirmation = confirm("Do you want to delete this review?");
+            if (!confirmation) return;
+
+            const updatedProductRating = await deleteProductReview({
+                productId: product.id,
+                userId: user.uid,
+            });
+
+            setReviews((prev) => prev.filter((item) => item.id !== review.id));
+            setProduct((prev) =>
+                prev
+                    ? {
+                        ...prev,
+                        rating: updatedProductRating.rating,
+                        reviewCount: updatedProductRating.reviewCount,
+                    }
+                    : prev
+            );
+            cancelEditReview();
+            toast.success("Review deleted successfully.");
+        } catch (error) {
+            console.error("Error deleting review:", error);
+            toast.error("Failed to delete review.");
         }
     }
 
@@ -137,5 +211,12 @@ export const useProductDetails = () => {
         prevImg,
         product, selectedStar, setSelectedStar, addReviews, comment,
         setComment,
+        reviews,
+        reviewsLoading,
+        editingReviewId,
+        startEditReview,
+        cancelEditReview,
+        deleteReview,
+        userId: user?.uid || null,
     }
 }

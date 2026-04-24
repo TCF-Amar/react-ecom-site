@@ -30,6 +30,30 @@ const mapProduct = (doc: QueryDocumentSnapshot<DocumentData>): Product => {
         updatedAt: data.updatedAt?.milliseconds || "",
     };
 };
+
+const toDateValue = (value: any) => {
+    if (value instanceof Timestamp) return value.toDate();
+    return value ?? "";
+};
+
+const mapReview = (doc: QueryDocumentSnapshot<DocumentData>): Review => {
+    const data = doc.data();
+
+    return {
+        id: data.id || doc.id,
+        productId: data.productId,
+        userId: data.userId,
+        userName: data.userName,
+        userAvatar: data.userAvatar,
+        rating: data.rating ?? 0,
+        comment: data.comment ?? "",
+        createdAt: toDateValue(data.createdAt),
+        updatedAt: toDateValue(data.updatedAt),
+        isEdited: data.isEdited ?? false,
+        isDeleted: data.isDeleted ?? false,
+        type: data.type,
+    };
+};
 export const fetchProductsFromFirestore = async (
     params: FetchParams
 ): Promise<{
@@ -167,6 +191,29 @@ export const fetchRelatedProductsFromFirestore = async ({
     }
 }
 
+export const fetchProductReviewsFromFirestore = async (productId: string): Promise<Review[]> => {
+    try {
+        const q = query(
+            collection(db, "reviews"),
+            where("productId", "==", productId),
+            where("isDeleted", "==", false)
+        );
+
+        const snapshot = await getDocs(q);
+        const reviews = snapshot.docs.map(mapReview);
+
+        return reviews.sort((a, b) => {
+            const bDate = new Date(b.updatedAt).getTime();
+            const aDate = new Date(a.updatedAt).getTime();
+            return bDate - aDate;
+        });
+    } catch (error: unknown) {
+        throw new Error(
+            error instanceof Error ? error.message : "Something went wrong"
+        );
+    }
+};
+
 interface Params {
     productId: string;
     newRating?: number;
@@ -283,6 +330,77 @@ export const addOrUpdateReview = async (review: Review) => {
                 rating: roundedRating,
                 reviewCount: count,
                 type: hasActiveReview ? "edited" : "new",
+            };
+        });
+    } catch (error: unknown) {
+        throw new Error(
+            error instanceof Error ? error.message : "Something went wrong"
+        );
+    }
+};
+
+export const deleteProductReview = async ({
+    productId,
+    userId,
+}: {
+    productId: string;
+    userId: string;
+}) => {
+    try {
+        if (!productId) throw new Error("Product id is required");
+        if (!userId) throw new Error("User id is required");
+
+        const reviewId = `${productId}_${userId}`;
+        const reviewRef = doc(db, "reviews", reviewId);
+        const productRef = doc(db, "products", productId);
+
+        return await runTransaction(db, async (transaction) => {
+            const productSnap = await transaction.get(productRef);
+            const reviewSnap = await transaction.get(reviewRef);
+
+            if (!productSnap.exists()) throw new Error("Product not found");
+            if (!reviewSnap.exists()) throw new Error("Review not found");
+
+            const productData = productSnap.data();
+            const reviewData = reviewSnap.data();
+
+            if (reviewData.isDeleted === true) {
+                return {
+                    rating: Number(productData.rating ?? 0),
+                    reviewCount: Number(productData.reviewCount ?? 0),
+                };
+            }
+
+            const oldRating = Number(reviewData.rating ?? 0);
+            let count = Number(productData.reviewCount ?? 0);
+            let avg = Number(productData.rating ?? 0);
+
+            if (count <= 1) {
+                count = 0;
+                avg = 0;
+            } else {
+                avg = ((avg * count) - oldRating) / (count - 1);
+                count -= 1;
+            }
+
+            const roundedRating = Number(avg.toFixed(1));
+            const now = Timestamp.now();
+
+            transaction.update(reviewRef, {
+                isDeleted: true,
+                type: "deleted",
+                updatedAt: now,
+            });
+
+            transaction.update(productRef, {
+                rating: roundedRating,
+                reviewCount: count,
+                updatedAt: now,
+            });
+
+            return {
+                rating: roundedRating,
+                reviewCount: count,
             };
         });
     } catch (error: unknown) {
