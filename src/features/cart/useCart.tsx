@@ -60,13 +60,13 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
     };
     if (product.category.slug === "clothes" && sizes === "") {
       console.log("Size Must be required");
-      toast.error("Size Toh select karo ");
+      toast.error("Please select a size before adding to cart.");
 
       return;
     } else {
       setTimeStart(true);
       await dispatch(addToCart(data));
-      toast.success("Item add to cart");
+      toast.success("Item added to cart");
       setQuantity(1);
       setTimeout(() => {
         setTimeStart(false);
@@ -101,10 +101,10 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
       (i) => i.product.slug === slug && i.sizes === sizes,
     );
     if (!item || item.quantity <= 1) {
-      const confirmation = confirm(" Delete Karna Hai kya item");
+      const confirmation = confirm("Are you sure you want to delete this item from the cart?");
       if (confirmation) {
         dispatch(removeItemFromCart({ slug, sizes }));
-        toast.success("Delete Kar Diya LOL");
+        toast.success("Item removed from cart");
       }
 
       return;
@@ -137,22 +137,22 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
   }, [debouncedQty]);
 
   const removeItemFromCartFn = async (slug: string, sizes: string) => {
-    const confirmation = confirm(" Delete Karna Hai kya item");
+    const confirmation = confirm("Are you sure you want to delete this item from the cart?");
     if (confirmation) {
       dispatch(removeItemFromCart({ slug, sizes }));
       await removeProductFromCart({ uid: user!.uid, slug, sizes });
-      toast.success("Delete Kar Diya LOL");
+      toast.success("Item removed from cart");
     }
   };
 
   const cartClear = async () => {
-    const confirmation = confirm("Sach main pura cart khali karna hai");
+    const confirmation = confirm("Are you sure you want to clear the entire cart?");
     if (confirmation) {
       dispatch(clearCart());
       await clearCartAllItems(items, user!.uid);
-      toast.success("Lo fir kar diya khali");
+      toast.success("Cart cleared");
     } else {
-      toast("Theek fir nahi kar raha khali");
+      toast.error("Cart not cleared");
     }
   };
   const cartClearCheckout = async () => {

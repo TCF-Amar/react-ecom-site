@@ -26,7 +26,9 @@ function CartPage() {
   if (loading) {
     return (
       <div className="h-100 w-full flex flex-col gap-4 justify-center items-center  text-3xl font-semibold text-black/50 ">
-        <p>Ruko jara </p>
+        <p>
+          Loading your cart...
+        </p>
       </div>
     );
   }

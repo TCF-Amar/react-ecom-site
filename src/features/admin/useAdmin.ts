@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { addProduct, fetchMyProducts } from "./adminSlice"
 
 import { updateProduct, deleteProduct } from "./adminSlice";
-import toast from "react-hot-toast"
 
 export const useAdmin = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
     const { user } = useAuth()
@@ -34,15 +33,10 @@ export const useAdmin = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => 
 
     const deleteProductFn = async (productId: number) => {
         if (!user?.uid) return
-        const haa = confirm("Kya admin ji sach me iss product ho delete karna hai ")
+        const haa = confirm("Are you sure you want to delete this product?")
         if (haa) {
             dispatch(deleteProduct({ productId, uid: user.uid }))
-        } else {
-
-
-            toast("Lo fir nahi kar raha delete")
-
-        }
+        } 
     }
 
     useEffect(() => {

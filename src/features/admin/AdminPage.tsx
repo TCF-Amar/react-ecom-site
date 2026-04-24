@@ -62,7 +62,7 @@ function AdminPage() {
             ))}
             {myProducts.length === 0 && (
               <div className="h-40 flex justify-center items-center text-slate-500">
-                No products found. Add one to get started!
+                No products found. Add product!
               </div>
             )}
           </div>
