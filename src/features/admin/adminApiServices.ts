@@ -1,6 +1,6 @@
 import { addDoc, collection, getDocs, orderBy, query, updateDoc, deleteDoc, Timestamp, where } from "firebase/firestore";
 import { db } from "../../config/firebaseConfigure";
-import type { AddProductData, FireStoreProductModel, ProductPayload } from "./adminTypes";
+import type {  FireStoreProductModel, ProductPayload } from "./adminTypes";
 
 
 const STOP_WORDS = new Set([
