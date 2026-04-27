@@ -4,7 +4,6 @@ import ProductCard from "../components/ProductCard";
 import { useProduct } from "../hook/useProduct";
 import { FiFilter } from "react-icons/fi";
 import ProductCardSkeleton from "../../../shared/components/Loader/ProductCardSkeleton";
-import { useEffect } from "react";
 
 function ProductPage() {
   const {

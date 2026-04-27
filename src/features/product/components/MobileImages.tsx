@@ -4,24 +4,21 @@ import { useState } from "react";
 
 function MobileImages({ pImages }: { pImages: string[] | undefined }) {
   const [currentIdx, setCurrentIdx] = useState(0);
+  const productImages = pImages ?? [];
 
   const nextImg = () => {
-    setCurrentIdx(currentIdx + 1);
-    if (currentIdx >= (pImages?.length || 0) - 1) {
-      setCurrentIdx(0);
-    }
+    if (productImages.length === 0) return;
+    setCurrentIdx((idx) => (idx >= productImages.length - 1 ? 0 : idx + 1));
   };
   const prevImg = () => {
-    setCurrentIdx(currentIdx - 1);
-    if (currentIdx <= 0) {
-      setCurrentIdx((pImages?.length || 0) - 1);
-    }
+    if (productImages.length === 0) return;
+    setCurrentIdx((idx) => (idx <= 0 ? productImages.length - 1 : idx - 1));
   };
   return (
     <div className="h-100 overflow-hidden  relative  md:hidden ">
-      {(pImages?.length || 0) !== 0 ? (
+      {productImages.length !== 0 ? (
         <img
-          src={pImages[currentIdx]}
+          src={productImages[currentIdx] ?? images.productDefault}
           alt=""
           className="h-full w-full object-cover "
           onError={(e) => {
@@ -43,7 +40,7 @@ function MobileImages({ pImages }: { pImages: string[] | undefined }) {
         </div>
       )}
 
-      {pImages.length > 1 && (
+      {productImages.length > 1 && (
         <div className="absolute flex justify-between items-center h-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-2">
           <FiChevronLeft
             className=" h-10 w-10 bg-gray-500/40 text-white"

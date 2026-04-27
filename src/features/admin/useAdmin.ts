@@ -16,16 +16,25 @@ export const useAdmin = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => 
 
     const addProductFn = async (product: AddProductData) => {
         if (!user?.uid) return false;
+        if (product.categoryId == null || product.price == null) return false;
+
+        const categoryId = Number(product.categoryId);
+        const price = Number(product.price);
+        
+        if (!Number.isFinite(categoryId) || !Number.isFinite(price)) return false;
+
+        const cat: Category | undefined = categories.find(
+            (category) => category.id === categoryId
+        );
+        if (!cat) return false;
+
         try {
-            const cat: Category = categories[product.categoryId];
             const productData: AddProductModel = {
                 title: product.title,
-                price: product.price,
+                price,
                 description: product.description,
                 images: product.images,
                 category: cat,
-
-
             }
             await dispatch(addProduct({ product: productData, uid: user.uid })).unwrap();
             return true;
