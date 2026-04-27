@@ -1,16 +1,16 @@
 import { Link } from "react-router-dom";
-import { useProduct } from "../../product/hook/useProduct";
 import ProductCard from "../../product/components/ProductCard";
 import ProductCardSkeleton from "../../../shared/components/Loader/ProductCardSkeleton";
 import { FiArrowRight } from "react-icons/fi";
+import { useHome } from "../useHome";
 
 function HomePage() {
-  const { products, loading } = useProduct();
-  const featuredProducts = products.slice(0, 5);
+  const { homeProducts, loading } = useHome();
+  const featuredProducts = homeProducts.slice(0, 5);
 
   return (
     <div className="flex flex-col gap-12 pb-12">
-      <div className="relative w-full h-[60vh] min-h-[400px] rounded-3xl overflow-hidden mt-4">
+      <div className="relative w-full h-[60vh] min-h-100 rounded-3xl overflow-hidden mt-4">
         <img
           src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop"
           alt="Hero background"
