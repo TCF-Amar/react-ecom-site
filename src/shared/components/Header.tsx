@@ -71,20 +71,16 @@ const Header: React.FC = () => {
             placeholder="Search products..."
             className="w-full bg-slate-50 border-none  py-2 pl-12 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all outline-none shadow-inner"
           />
-          {
-            searchQuery.length !==  0 && 
-            (
-             <FiX 
-             onClick={() => setSearchQuery("")}
-             className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer"
-             /> 
-            )
-          }
+          {searchQuery.length !== 0 && (
+            <FiX
+              onClick={() => setSearchQuery("")}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer"
+            />
+          )}
         </div>
 
         <div className="flex items-center gap-4 sm:gap-6">
           <div className="flex items-center gap-4">
-           
             <Link
               to={"/cart"}
               className="relative text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer group"
@@ -183,7 +179,6 @@ const Header: React.FC = () => {
             </nav>
 
             <div className="grid grid-cols-2 gap-4 md:hidden">
-             
               <Link
                 to={"/profile"}
                 className="flex items-center justify-center gap-3 py-4 bg-slate-50  text-slate-900 font-bold border border-slate-100 active:scale-95 transition-all hover:scale-105"
@@ -194,9 +189,12 @@ const Header: React.FC = () => {
                       <p className="text-xs font-bold text-slate-900 truncate max-w-25 leading-tight">
                         {user?.displayName || "User"}
                       </p>
-                      <p className="text-xs font-bold text-slate-900 truncate max-w-25 leading-tight">
-                        {user?.email || "User"}
-                      </p>
+                      <button
+                        onClick={signOutUser}
+                        className="text-[10px] text-slate-400 hover:text-red-500 font-bold uppercase tracking-wider transition-colors"
+                      >
+                        Logout
+                      </button>
                     </div>
                     <div className="w-10 h-10 bg-slate-100  flex items-center justify-center text-slate-600 border border-slate-200 overflow-hidden cursor-pointer hover:border-indigo-500 transition-all group">
                       {user?.photoURL ? (
