@@ -1,6 +1,6 @@
 import { addDoc, collection, getDocs, orderBy, query, updateDoc, deleteDoc, Timestamp, where } from "firebase/firestore";
 import { db } from "../../config/firebaseConfigure";
-import type { AddProductData, AddProductModel, FireStoreProductModel } from "./adminTypes";
+import type { AddProductData, FireStoreProductModel, ProductPayload } from "./adminTypes";
 
 
 const STOP_WORDS = new Set([
@@ -47,7 +47,7 @@ export const createUniqueSlug = (text: string): string => {
 
 
 
-export const addProduct = async (product: AddProductModel, uid: string) => {
+export const addProduct = async (product: ProductPayload, uid: string) => {
     try {
         const id = Date.now();
         const slug = createUniqueSlug(product.title);
@@ -112,7 +112,7 @@ export const getMyProducts = async (uid: string): Promise<FireStoreProductModel[
     }
 };
 
-export const updateProduct = async (product: Partial<AddProductData>, productId: number, uid: string) => {
+export const updateProduct = async (product: Partial<ProductPayload>, productId: number, uid: string) => {
     try {
         const userProductsRef = collection(db, "users", uid, "products");
         const qUser = query(userProductsRef, where("id", "==", productId));
@@ -127,8 +127,11 @@ export const updateProduct = async (product: Partial<AddProductData>, productId:
         const now = Timestamp.now();
 
         const updateData: any = {
+            
             updatedAt: now,
         };
+
+
 
         if (product.title !== undefined) {
             updateData.title = product.title;
@@ -137,6 +140,7 @@ export const updateProduct = async (product: Partial<AddProductData>, productId:
         if (product.price !== undefined && product.price !== null) updateData.price = Number(product.price);
         if (product.description !== undefined) updateData.description = product.description;
         if (product.images !== undefined) updateData.images = product.images;
+        if (product.category !== undefined) updateData.category = product.category;
 
         // Update user's collection
         await updateDoc(userDoc.ref, updateData);
@@ -146,7 +150,10 @@ export const updateProduct = async (product: Partial<AddProductData>, productId:
         const qGlobal = query(globalProductsRef, where("id", "==", productId));
         const globalSnapshot = await getDocs(qGlobal);
 
+        console.log("Global Snapshot:", globalSnapshot);
         if (!globalSnapshot.empty) {
+            console.log("asdsadasda", updateData);
+            
             await updateDoc(globalSnapshot.docs[0].ref, updateData);
         }
 

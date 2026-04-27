@@ -6,26 +6,27 @@ export interface AddProductData {
     price: number | null;
     description: string;
     categoryId: number | null;
-    images: string[]
-}
-export interface FireStoreProductModel {
-    id: number;
-    title: string;
-    slug: string;
-    price: number;
-    description: string
-    categoryId: number;
     images: string[];
-    createdAt: string;
-    updatedAt: string;
 }
 
-export interface AddProductModel {
+export interface ProductPayload {
     title: string;
     price: number;
     description: string;
     category: Category;
     images: string[];
-    updatedAt?: Timestamp;
-    createdAt?: Timestamp;
 }
+
+export interface FireStoreProductModel {
+    id: number;
+    title: string;
+    slug: string;
+    price: number | null;
+    description: string;
+    category: Category | null;
+    images: string[];
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
+}
+
+

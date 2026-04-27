@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { addProduct, fetchMyProducts } from "./adminSlice"
 
 import { updateProduct, deleteProduct } from "./adminSlice";
-import type { AddProductData, AddProductModel } from "./adminTypes";
+import type { AddProductData, ProductPayload } from "./adminTypes";
 import type { Category } from "../product/productTypes";
 import { useProduct } from "../product/hook/useProduct";
 
@@ -20,7 +20,7 @@ export const useAdmin = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => 
 
         const categoryId = Number(product.categoryId);
         const price = Number(product.price);
-        
+
         if (!Number.isFinite(categoryId) || !Number.isFinite(price)) return false;
 
         const cat: Category | undefined = categories.find(
@@ -29,7 +29,7 @@ export const useAdmin = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => 
         if (!cat) return false;
 
         try {
-            const productData: AddProductModel = {
+            const productData: ProductPayload = {
                 title: product.title,
                 price,
                 description: product.description,
@@ -43,10 +43,31 @@ export const useAdmin = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => 
         }
     }
 
-    const updateProductFn = async (product: any, productId: number) => {
+    const updateProductFn = async (product: AddProductData, productId: number) => {
         if (!user?.uid) return false;
+        if (product.categoryId == null || product.price == null) return false;
+        console.log(product.categoryId);
+        
+        const categoryId = Number(product.categoryId);
+        const price = Number(product.price);
+
+        if (!Number.isFinite(categoryId) || !Number.isFinite(price)) return false;
+
+        const cat: Category | undefined = categories.find(
+            (category) => category.id === categoryId
+        );
+        if (!cat) return false;
+
         try {
-            await dispatch(updateProduct({ product, productId, uid: user.uid })).unwrap();
+            const productData: ProductPayload = {
+                title: product.title,
+                price,
+                description: product.description,
+                images: product.images,
+                category: cat,
+            }
+            console.log("Updated Product Data:", productData);
+            await dispatch(updateProduct({ product: productData, productId, uid: user.uid })).unwrap();
             return true;
         } catch (err) {
             return false;

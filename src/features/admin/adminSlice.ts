@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
 import { getMyProducts, addProduct as addProductAPI, updateProduct as updateProductAPI, deleteProduct as deleteProductAPI } from "./adminApiServices";
-import type {  AddProductModel, FireStoreProductModel } from "./adminTypes";
+import type {  FireStoreProductModel, ProductPayload } from "./adminTypes";
 import toast from "react-hot-toast";
 
 export const fetchMyProducts = createAsyncThunk(
@@ -20,7 +20,7 @@ export const fetchMyProducts = createAsyncThunk(
 
 export const addProduct = createAsyncThunk(
     'admin/addProduct',
-    async ({ product, uid }: { product: AddProductModel; uid: string }) => {
+    async ({ product, uid }: { product: ProductPayload; uid: string }) => {
         const res = await addProductAPI(product, uid);
         return res.firestoreProduct;
     },
@@ -34,7 +34,9 @@ export const addProduct = createAsyncThunk(
 
 export const updateProduct = createAsyncThunk(
     'admin/updateProduct',
-    async ({ product, productId, uid }: { product: Partial<AddProductModel>; productId: number; uid: string }) => {
+    async ({ product, productId, uid }: { product: Partial<ProductPayload>; productId: number; uid: string }) => {
+        console.log("sdf",product,productId,uid);
+        
         const res = await updateProductAPI(product, productId, uid);
         return res.firestoreProduct;
     },

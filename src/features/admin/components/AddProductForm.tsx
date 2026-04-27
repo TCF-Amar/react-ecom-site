@@ -27,11 +27,13 @@ function AddProductForm({
 
   useEffect(() => {
     if (editingProduct) {
+      console.log(editingProduct);
+
       reset({
         title: editingProduct.title,
         price: editingProduct.price,
         description: editingProduct.description,
-        categoryId: editingProduct.categoryId,
+        categoryId: editingProduct.category?.id || null,
       });
       setImages(editingProduct.images);
     } else {
@@ -39,7 +41,7 @@ function AddProductForm({
         title: "",
         price: null,
         description: "",
-        categoryId: 1,
+        categoryId: null,
       });
       setImages(["https://placehold.co/600x400"]);
     }
@@ -78,14 +80,15 @@ function AddProductForm({
     try {
       if (editingProduct) {
         success = await updateProductFn(
-          { ...data, images } as any,
+          { ...data, images } as AddProductData,
           editingProduct.id,
         );
       } else {
-        success = await addProductFn({ ...data, images } as any);
+        success = await addProductFn({ ...data, images } as AddProductData);
       }
 
-      console.log("Form Data:", { ...data, images });
+      console.log("Form Page ", { ...data, images });
+      
 
       if (success) {
         setTimeout(() => {
@@ -94,7 +97,7 @@ function AddProductForm({
             title: "",
             price: null,
             description: "",
-            categoryId: 1,
+            categoryId: null,
           });
           submitLockRef.current = false;
           setIsSubmitting(false);
@@ -114,7 +117,7 @@ function AddProductForm({
       className={`fixed inset-0 flex z-50 justify-end transition-all duration-300 ${showForm ? "bg-slate-900/40 backdrop-blur-sm" : "bg-transparent pointer-events-none"}`}
     >
       <div
-        className={`bg-white shadow-2xl h-full transition-transform duration-300 w-full md:w-[500px] flex flex-col ${showForm ? "translate-x-0" : "translate-x-full"}`}
+        className={`bg-white shadow-2xl h-full transition-transform duration-300 w-full md:w-125 flex flex-col ${showForm ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex justify-between items-center p-6 border-b border-slate-100">
           <h2 className="text-xl font-bold text-slate-800">
@@ -159,7 +162,7 @@ function AddProductForm({
             </label>
             <textarea
               placeholder="Describe the product..."
-              className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all min-h-[100px] resize-y"
+              className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all min-h-25 resize-y"
               {...register("description")}
             />
           </div>
@@ -169,15 +172,20 @@ function AddProductForm({
             </label>
             <select
               className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all bg-white"
-              {...register("categoryId")}
+              {...register("categoryId", { valueAsNumber: true })}
               required
             >
-              <option disabled selected>
+              <option value="" disabled>
                 Select Category
               </option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
+                <option
+                  key={cat.id}
+                  value={cat.id}
+                  selected={editingProduct?.category?.id === cat.id}
+                >
                   {cat.name}
+                  {/* {editingProduct?.category.id === cat.id && " (Current)"} */}
                 </option>
               ))}
             </select>
