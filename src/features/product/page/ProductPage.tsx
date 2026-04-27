@@ -22,11 +22,7 @@ function ProductPage() {
   } = useProduct();
   const [showMore, setShowMore] = useState<boolean>(false);
   const [showFilter, setShowFilter] = useState(false);
-  const [values, setValues] = useState<number[]>(priceRange || [0, 500000]);
-
-  useEffect(() => {
-    setValues(priceRange || [0, 500000]);
-  }, [priceRange]);
+  
 
   const hasFilters =
     (categoryId && categoryId.length > 0) ||
