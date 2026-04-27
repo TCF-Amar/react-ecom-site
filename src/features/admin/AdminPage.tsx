@@ -34,13 +34,9 @@ function AdminPage() {
         setShowForm={setShowForm}
       />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 min-w-150">
         <div>
           <h1 className="text-3xl font-serif text-slate-900">Admin</h1>
-          <p className="text-slate-500 mt-1">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-            Architecto, numquam.
-          </p>
         </div>
         <button
           onClick={toggleForm}

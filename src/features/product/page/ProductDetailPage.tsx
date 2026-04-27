@@ -1,8 +1,6 @@
 import Breadcrumb from "../../../shared/components/Breadcrumb";
-import { images } from "../../../constants/images";
 import {
   FiChevronLeft,
-  FiChevronRight,
   FiMinus,
   FiPlus,
   FiStar,
@@ -14,16 +12,15 @@ import ProductCard from "../components/ProductCard";
 import { useProductDetails } from "../hook/useProductDetails";
 import ProductDetailSkeleton from "../../../shared/components/Loader/ProductDetailSkeleton";
 import { useCart } from "../../cart/useCart";
+import ProductImages from "../components/ProductImages";
+import { Link } from "react-router-dom";
+import MobileImages from "../components/MobileImages";
 
 function ProductDetail() {
   const {
     navigate,
     relatedProduct,
     loading,
-    nextImg,
-    prevImg,
-    pImages,
-    currentIdx,
     product,
     selectedStar,
     setSelectedStar,
@@ -37,6 +34,7 @@ function ProductDetail() {
     cancelEditReview,
     deleteReview,
     userId,
+    addingReview,
   } = useProductDetails();
   const {
     isTimeStart,
@@ -44,6 +42,7 @@ function ProductDetail() {
     incQty,
     decQty,
     quantity,
+
     sizes,
     setSizes,
     setQuantity,
@@ -71,7 +70,7 @@ function ProductDetail() {
   }
 
   return (
-    <div>
+    <div className="relative">
       <Breadcrumb />
       {/* desktop */}
       <div className="py-8">
@@ -84,44 +83,7 @@ function ProductDetail() {
           <FiChevronLeft size={20} />
           <p className="uppercase ">Back</p>
         </button>
-        <div className="h-100 overflow-hidden  relative  md:hidden ">
-          {pImages.length !== 0 ? (
-            <img
-              src={pImages[currentIdx]}
-              alt=""
-              className="h-full w-full object-cover "
-              onError={(e) => {
-                e.currentTarget.src = images.productDefault;
-              }}
-            />
-          ) : (
-            <div className="h-100 overflow-hidden">
-              <div className="w-full h-full border">
-                <img
-                  src={images.productDefault}
-                  alt=""
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    e.currentTarget.src = images.productDefault;
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          {pImages.length > 1 && (
-            <div className="absolute flex justify-between items-center h-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-2">
-              <FiChevronLeft
-                className=" h-10 w-10 bg-gray-500/40 text-white"
-                onClick={prevImg}
-              />
-              <FiChevronRight
-                className=" h-10 w-10 bg-gray-500/40 text-white"
-                onClick={nextImg}
-              />
-            </div>
-          )}
-        </div>
+        <MobileImages pImages={product?.images} />
         <div className="p-5">
           <p className="text-xl md:text-2xl capitalize font-semibold text-black/80 ">
             {product?.title}
@@ -129,53 +91,7 @@ function ProductDetail() {
         </div>
         <div className=" flex gap-2 ">
           {/* desktop */}
-          <div className="flex-2 hidden md:block h-fit sticky top-24">
-            {pImages.length === 1 ? (
-              <div className="h-100 overflow-hidden rounded-2xl shadow-sm bg-slate-50">
-                <div className="w-full h-full transition-all duration-300 ease-in-out">
-                  <img
-                    src={pImages[0]}
-                    alt=""
-                    className="w-full h-full object-cover object-center"
-                  />
-                </div>
-              </div>
-            ) : pImages.length >= 1 ? (
-              <div className="h-100 flex gap-4 relative">
-                {[...Array(2)].map((_, idx) => (
-                  <div
-                    key={idx}
-                    className="h-full w-full relative overflow-hidden rounded-2xl shadow-sm bg-slate-50"
-                  >
-                    <div
-                      className={`flex justify-center items-center text-2xl cursor-pointer transition-all ${pImages.length > 2 && idx == 1 ? "absolute inset-0 bg-black/40 text-white font-medium z-10" : "hidden"}`}
-                    >
-                      <FiPlus /> {pImages.length - 1}
-                    </div>
-                    <img
-                      src={product?.images[idx]}
-                      alt={idx.toString()}
-                      className={`object-cover h-full w-full cursor-pointer hover:scale-105 transition-transform duration-500`}
-                      onError={(e) => {
-                        e.currentTarget.src = images.productDefault;
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="h-100 overflow-hidden rounded-2xl shadow-sm bg-slate-50">
-                <div className="w-full h-full">
-                  <img
-                    src={images.productDefault}
-                    alt=""
-                    className="w-full h-full object-contain p-8"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
+          <ProductImages pImages={product?.images} />
           {/* mobile */}
 
           <div className={`flex-1 flex flex-col gap-6 md:pl-8`}>
@@ -241,19 +157,19 @@ function ProductDetail() {
                   <FiPlus />
                 </button>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex  gap-4 flex-wrap">
                 {isTimeStart ? (
-                  <button
-                    type="button"
-                    className="flex-1 bg-indigo-600 text-white rounded-xl flex justify-center items-center py-4 font-semibold hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                  <Link
+                    to={"/cart"}
+                    className="w-full md:min-w-50 bg-indigo-600 text-white rounded-xl flex justify-center items-center py-4 font-semibold hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                   >
                     Go To Cart
-                  </button>
+                  </Link>
                 ) : (
                   <button
                     type="button"
                     onClick={() => addCartFn(product)}
-                    className="flex-1 bg-slate-900 text-white rounded-xl flex justify-center items-center py-4 font-semibold hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                    className="w-full md:min-w-50 bg-slate-900 text-white rounded-xl flex justify-center items-center py-4 font-semibold hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                   >
                     Add To Cart
                   </button>
@@ -261,7 +177,7 @@ function ProductDetail() {
                 <button
                   type="button"
                   // onClick={addToCartBtn}
-                  className="flex-1 bg-slate-100 text-slate-900 rounded-xl flex justify-center items-center py-4 font-semibold hover:bg-slate-200 transition-all duration-300"
+                  className="w-full md:min-w-50 bg-slate-100 text-slate-900 rounded-xl flex justify-center items-center py-4 font-semibold hover:bg-slate-200 transition-all duration-300"
                 >
                   Buy Now for ${product?.price}
                 </button>
@@ -285,7 +201,7 @@ function ProductDetail() {
 
         <div className=" flex  overflow-hidden gap-4  overflow-x-auto ">
           {relatedProduct.map((product, i) => (
-            <div className=" min-w-50 " key={i}>
+            <div className=" min-w-50 max-w-60" key={i}>
               <ProductCard product={product} />
             </div>
           ))}
@@ -421,13 +337,18 @@ function ProductDetail() {
               className="
               w-full h-24 border rounded-md p-2 outline-none  focus:border transition-all duration-300
             "
-              onChange={(e)=>setComment(e.target.value)}
+              onChange={(e) => setComment(e.target.value)}
             />
             <button
-              className="bg-slate-900 text-white py-2 rounded-lg font-medium hover:bg-slate-800 transition-all"
+              className={` w-full bg-slate-900 text-white py-2 rounded-lg font-medium hover:bg-slate-800 transition-all`}
               onClick={addReviews}
+              disabled={addingReview}
             >
-              {editingReviewId ? "Update Review" : "Submit Review"}
+              {addingReview
+                ? "Submitting..."
+                : editingReviewId
+                  ? "Update Review"
+                  : "Submit Review"}
             </button>
           </div>
         </div>

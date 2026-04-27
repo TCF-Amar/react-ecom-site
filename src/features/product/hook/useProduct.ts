@@ -7,13 +7,15 @@ import {
     setProductsError,
     setProductsLoading,
     setSearchQuery,
+    setPriceRange,
+    setSortBy,
+    setSortOrder,
 } from "../productSlice";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { useDebounce } from "../../../shared/hooks/useDebounce";
 import { fetchProductsFromFirestore } from "../productFirebaseServices";
 import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
-const CACHE_TTL = 5 * 60 * 1000;
 const LIMIT_COUNT = 20;
 export const useProduct = () => {
     const dispatch = useAppDispatch();
@@ -24,13 +26,16 @@ export const useProduct = () => {
         loading,
         products,
         hasMore,
-        lastFetchedAt,
         searchQuery,
         categoryId,
+        priceRange,
+        sortBy,
+        sortOrder,
     } = useAppSelector((state) => state.product);
 
     const query = useDebounce(searchQuery, 500);
-
+    const categoryQuery = useDebounce(categoryId?.join(","), 500);
+    const priceQuery = useDebounce(priceRange?.join(","), 500);
     const lastDocRef = useRef<QueryDocumentSnapshot<DocumentData> | undefined>(
         undefined
     );
@@ -38,7 +43,11 @@ export const useProduct = () => {
     const isFetchingRef = useRef(false);
     const requestIdRef = useRef(0);
     const prevQueryRef = useRef<string | undefined>(undefined);
-    const prevCategoryRef = useRef<number | null | undefined>(undefined);
+    const prevCategoryRef = useRef<number[] | null | undefined>(undefined);
+    const prevPriceRef = useRef<string | null | undefined>(undefined);
+    const prevSortByRef = useRef<string | undefined>(undefined);
+    const prevSortOrderRef = useRef<string | undefined>(undefined);
+
 
 
     const loadProducts = useCallback(async (reset = false) => {
@@ -53,8 +62,12 @@ export const useProduct = () => {
             const { products: fetched, lastDoc } = await fetchProductsFromFirestore({
                 last: reset ? undefined : lastDocRef.current,
                 search: query,
-                categoryId,
+                categoryId: categoryId?.map((id) => Number(id)),
+                minPrize: priceRange ? priceRange[0] : undefined,
+                maxPrize: priceRange ? priceRange[1] : undefined,
                 limitCount: LIMIT_COUNT,
+                sortBy,
+                sortOrder,
             });
 
             if (currentRequestId !== requestIdRef.current) return;
@@ -71,7 +84,7 @@ export const useProduct = () => {
                 isFetchingRef.current = false;
             }
         }
-    }, [query, categoryId, hasMore]);
+    }, [query, categoryQuery, priceQuery, sortBy, sortOrder, hasMore]);
 
 
     const loadProductsRef = useRef(loadProducts);
@@ -87,31 +100,41 @@ export const useProduct = () => {
 
 
     useEffect(() => {
-        const now = Date.now();
-
-        const isCacheValid =
-            products.length > 0 &&
-            lastFetchedAt &&
-            now - lastFetchedAt < CACHE_TTL;
-
-        if (!isCacheValid) {
-            lastDocRef.current = undefined;
-            loadProducts(true);
-        }
+        dispatch(resetProduct());
+        lastDocRef.current = undefined;
+        loadProducts(true);
     }, []);
 
 
     useEffect(() => {
-        if (prevQueryRef.current === undefined && prevCategoryRef.current === undefined) {
+        if (
+            prevQueryRef.current === undefined &&
+            prevCategoryRef.current?.join(",") === categoryId?.join(",") &&
+            prevPriceRef.current === priceQuery &&
+            prevSortByRef.current === sortBy &&
+            prevSortOrderRef.current === sortOrder
+        ) {
             prevQueryRef.current = query;
             prevCategoryRef.current = categoryId;
+            prevPriceRef.current = priceQuery;
+            prevSortByRef.current = sortBy;
+            prevSortOrderRef.current = sortOrder;
             return;
         }
 
-        if (prevQueryRef.current === query && prevCategoryRef.current === categoryId) return;
+        if (
+            prevQueryRef.current === query &&
+            prevCategoryRef.current?.join(",") === categoryId?.join(",") &&
+            prevPriceRef.current === priceQuery &&
+            prevSortByRef.current === sortBy &&
+            prevSortOrderRef.current === sortOrder
+        ) return;
 
         prevQueryRef.current = query;
         prevCategoryRef.current = categoryId;
+        prevPriceRef.current = priceQuery;
+        prevSortByRef.current = sortBy;
+        prevSortOrderRef.current = sortOrder;
 
         requestIdRef.current++;
         isFetchingRef.current = false;
@@ -119,7 +142,7 @@ export const useProduct = () => {
 
         dispatch(resetProduct());
         loadProducts(true);
-    }, [query, categoryId]);
+    }, [query, categoryId, priceQuery, sortBy, sortOrder]);
 
 
     useEffect(() => {
@@ -154,7 +177,16 @@ export const useProduct = () => {
         setSearchQuery: (q: string) => dispatch(setSearchQuery(q)),
 
         categoryId,
-        setCategoryId: (id: number | null) => dispatch(setCategoryId(id)),
+        setCategoryId: (id: number[] | null) => dispatch(setCategoryId(id)),
+
+        priceRange,
+        setPriceRange: (range: [number, number] | null) => dispatch(setPriceRange(range)),
+
+        sortBy,
+        setSortBy: (sort: "title" | "price" | "rating" | "createdAt") => dispatch(setSortBy(sort)),
+
+        sortOrder,
+        setSortOrder: (order: "asc" | "desc") => dispatch(setSortOrder(order)),
 
         fetchMore,
     };

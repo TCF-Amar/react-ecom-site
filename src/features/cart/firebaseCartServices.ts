@@ -9,7 +9,7 @@ export const getCartProducts = async (userId: string) => {
 
     const q = query(cartRef, orderBy("createdAt", "desc"))
 
-    
+
     const snapshot = await getDocs(q);
 
     return snapshot.docs.map((doc) => {
@@ -38,7 +38,7 @@ export const addProductInCart = async (uid: string, slug: string, data: CartData
             await updateDoc(cartRef, {
                 ...data,
                 quantity: increment(data.quantity ?? 1),
-                
+
             });
         } else {
 
@@ -57,28 +57,22 @@ export const addProductInCart = async (uid: string, slug: string, data: CartData
 
 export const updateQty = async (updData: CartUpdateData) => {
     try {
-        const cartRef = doc(db, "users", updData.uid, "cart", `${updData.slug}_${updData.sizes}`);
+        const cartRef = doc(
+            db,
+            "users",
+            updData.uid,
+            "cart",
+            `${updData.slug}_${updData.sizes}`
+        );
 
-        const snap = await getDoc(cartRef)
-
-        if (!snap.exists()) return;
-
-        const data = snap.data();
-        const cartData = {
-            product: data!.product,
-            sizes: data.sizes,
+        await updateDoc(cartRef, {
             quantity: updData.qty
-            
-        }
-        await updateDoc(cartRef, cartData)
+        });
 
     } catch (error) {
         throw error;
     }
-
-
-
-}
+};
 
 export const removeProductFromCart = async (rmv: ItemRemoveData) => {
     try {

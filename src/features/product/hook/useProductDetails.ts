@@ -17,6 +17,7 @@ export const useProductDetails = () => {
     const [comment, setComment] = useState("");
     const [reviews, setReviews] = useState<Review[]>([]);
     const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+    const [addingReview, setAddingReview] = useState(false);
 
 
     const [slug, setSlug] = useState<string | null>(
@@ -77,24 +78,11 @@ export const useProductDetails = () => {
 
         fetProduct();
     }, [slug, location.pathname]);
-    const pImages = product?.images || [];
 
-    const [currentIdx, setCurrentIdx] = useState(0);
 
-    const nextImg = () => {
-        setCurrentIdx(currentIdx + 1);
-        if (currentIdx >= pImages.length - 1) {
-            setCurrentIdx(0);
-        }
-    };
-    const prevImg = () => {
-        setCurrentIdx(currentIdx - 1);
-        if (currentIdx <= 0) {
-            setCurrentIdx(pImages.length - 1);
-        }
-    };
 
     const addReviews = async () => {
+        setAddingReview(true);
         try {
             if (!user) {
                 navigate("/login");
@@ -145,6 +133,8 @@ export const useProductDetails = () => {
         } catch (error) {
             console.error("Error adding review:", error);
             toast.error("Failed to submit review.");
+        } finally {
+            setAddingReview(false);
         }
     }
 
@@ -161,6 +151,7 @@ export const useProductDetails = () => {
     }
 
     const deleteReview = async (review: Review) => {
+        setAddingReview(true);
         try {
             if (!user) {
                 navigate("/login");
@@ -198,17 +189,15 @@ export const useProductDetails = () => {
         } catch (error) {
             console.error("Error deleting review:", error);
             toast.error("Failed to delete review.");
+        } finally {
+            setAddingReview(false);
         }
     }
 
     return {
         navigate,
         relatedProduct,
-        pImages,
-        currentIdx,
         loading,
-        nextImg,
-        prevImg,
         product, selectedStar, setSelectedStar, addReviews, comment,
         setComment,
         reviews,
@@ -218,5 +207,7 @@ export const useProductDetails = () => {
         cancelEditReview,
         deleteReview,
         userId: user?.uid || null,
+        addingReview,
+
     }
 }

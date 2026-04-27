@@ -170,8 +170,11 @@ function AddProductForm({
             <select
               className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all bg-white"
               {...register("categoryId")}
+              required
             >
-              <option value="1">Uncategorized</option>
+              <option disabled selected>
+                Select Category
+              </option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}

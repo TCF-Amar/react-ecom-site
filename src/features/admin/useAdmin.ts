@@ -4,17 +4,30 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { addProduct, fetchMyProducts } from "./adminSlice"
 
 import { updateProduct, deleteProduct } from "./adminSlice";
+import type { AddProductData, AddProductModel } from "./adminTypes";
+import type { Category } from "../product/productTypes";
+import { useProduct } from "../product/hook/useProduct";
 
 export const useAdmin = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
     const { user } = useAuth()
     const dispatch = useAppDispatch()
-
+    const { categories } = useProduct()
     const { myProducts, loading, error, adding, updating, deleting } = useAppSelector(state => state.admin)
 
-    const addProductFn = async (product: any) => {
+    const addProductFn = async (product: AddProductData) => {
         if (!user?.uid) return false;
         try {
-            await dispatch(addProduct({ product, uid: user.uid })).unwrap();
+            const cat: Category = categories[product.categoryId];
+            const productData: AddProductModel = {
+                title: product.title,
+                price: product.price,
+                description: product.description,
+                images: product.images,
+                category: cat,
+
+
+            }
+            await dispatch(addProduct({ product: productData, uid: user.uid })).unwrap();
             return true;
         } catch (err) {
             return false;
@@ -36,7 +49,7 @@ export const useAdmin = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => 
         const haa = confirm("Are you sure you want to delete this product?")
         if (haa) {
             dispatch(deleteProduct({ productId, uid: user.uid }))
-        } 
+        }
     }
 
     useEffect(() => {

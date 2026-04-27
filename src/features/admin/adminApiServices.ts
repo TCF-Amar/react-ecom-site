@@ -54,13 +54,14 @@ export const addProduct = async (product: AddProductModel, uid: string) => {
         const searchKeywords = generateSearchKeywords(product.title);
         const now = Timestamp.now();
 
+
         const firestoreProduct = {
             id,
             title: product.title,
             slug,
             price: Number(product.price),
             description: product.description,
-            category: product.category || { id: 0, name: "Uncategorized", slug: "uncategorized", image: "https://placeholder.co/600/600" },
+            category: product.category,
             images: product.images || [],
             searchKeywords,
             createdAt: now,

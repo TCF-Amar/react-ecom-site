@@ -5,7 +5,7 @@ import PublicRoute from "./PublicRoute";
 import AuthPage from "../../features/auth/pages/AuthPage";
 import HomePage from "../../features/home/pages/HomePage";
 import ProductPage from "../../features/product/page/ProductPage";
-import ProductDetail from "../../features/product/page/ProductDetail";
+import ProductDetail from "../../features/product/page/ProductDetailPage";
 import CartPage from "../../features/cart/CartPage";
 import CheckOutPage from "../../features/checkout/CheckOutPage";
 import AdminPage from "../../features/admin/AdminPage";

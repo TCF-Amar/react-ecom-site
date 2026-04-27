@@ -26,6 +26,6 @@ export interface AddProductModel {
     description: string;
     category: Category;
     images: string[];
-    updatedAt: Timestamp;
+    updatedAt?: Timestamp;
     createdAt?: Timestamp;
 }

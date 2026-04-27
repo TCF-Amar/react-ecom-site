@@ -21,9 +21,12 @@ const initialState: ProductState = {
     loading: false,
     error: null,
     hasMore: true,
-    lastFetchedAt: null,
     searchQuery: "",
-    categoryId: null,
+    categoryId: [],
+    priceRange: [0, 500000],
+    sortBy: "createdAt",
+    sortOrder: "desc",
+
 }
 
 export const productSlice = createSlice({
@@ -35,7 +38,6 @@ export const productSlice = createSlice({
             state.hasMore = true;
             state.error = null;
             state.loading = false;
-            state.lastFetchedAt = null;
 
         },
 
@@ -54,7 +56,6 @@ export const productSlice = createSlice({
 
             state.products.push(...newProducts);
             state.hasMore = action.payload.hasMore;
-            state.lastFetchedAt = Date.now();
 
         },
 
@@ -70,9 +71,20 @@ export const productSlice = createSlice({
             state.searchQuery = action.payload;
         },
 
-        setCategoryId: (state, action: PayloadAction<number | null>) => {
+        setCategoryId: (state, action: PayloadAction<number[] | null>) => {
             state.categoryId = action.payload;
         },
+
+        setPriceRange: (state, action: PayloadAction<[number, number] | null>) => {
+            state.priceRange = action.payload;
+        },
+        setSortBy: (state, action: PayloadAction<"title" | "price" | "rating" | "createdAt">) => {
+            state.sortBy = action.payload;
+        },
+        setSortOrder: (state, action: PayloadAction<"asc" | "desc">) => {
+            state.sortOrder = action.payload;
+        },
+
     },
     extraReducers: (builder) => {
         builder
@@ -95,6 +107,9 @@ export const {
     setProductsError,
     setSearchQuery,
     setCategoryId,
+    setPriceRange,
+    setSortBy,
+    setSortOrder,
 } = productSlice.actions;
 
 // re-export DocumentData type so hook imports stay clean

@@ -134,6 +134,8 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
   useEffect(() => {
     if (!user?.uid || !activeItem) return;
     update();
+    console.log("updated");
+    
   }, [debouncedQty]);
 
   const removeItemFromCartFn = async (slug: string, sizes: string) => {

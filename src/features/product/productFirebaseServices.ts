@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, limit, query, QueryConstraint, QueryDocumentSnapshot, runTransaction, startAfter, Timestamp, where, type DocumentData } from "firebase/firestore"
+import { collection, doc, getDocs, limit, orderBy, query, QueryConstraint, QueryDocumentSnapshot, runTransaction, startAfter, Timestamp, where, type DocumentData } from "firebase/firestore"
 import { db } from "../../config/firebaseConfigure"
 import type { Category, Product, Review } from "./productTypes";
 
@@ -6,10 +6,12 @@ import type { Category, Product, Review } from "./productTypes";
 interface FetchParams {
     last?: QueryDocumentSnapshot<DocumentData>;
     search?: string;
-    categoryId?: number | null;
+    categoryId?: number[] | null;
     limitCount: number;
     minPrize?: number;
     maxPrize?: number;
+    sortBy?: "price" | "rating" | "createdAt" | "title";
+    sortOrder?: "asc" | "desc";
 }
 
 const mapProduct = (doc: QueryDocumentSnapshot<DocumentData>): Product => {
@@ -61,7 +63,7 @@ export const fetchProductsFromFirestore = async (
     lastDoc: QueryDocumentSnapshot<DocumentData> | null;
 }> => {
     try {
-        const { last, search, categoryId, limitCount, minPrize, maxPrize } = params;
+        const { last, search, categoryId, limitCount, minPrize, maxPrize, sortBy, sortOrder } = params;
 
         const constraints: QueryConstraint[] = [];
 
@@ -74,8 +76,8 @@ export const fetchProductsFromFirestore = async (
         }
 
 
-        if (categoryId != null) {
-            constraints.push(where("category.id", "==", categoryId));
+        if (categoryId != null && categoryId.length > 0) {
+            constraints.push(where("category.id", "in", categoryId));
         }
 
         if (minPrize != null && maxPrize != null) {
@@ -89,6 +91,22 @@ export const fetchProductsFromFirestore = async (
             constraints.push(where("price", "<=", maxPrize));
         }
 
+        switch (sortBy) {
+            case "price":
+                constraints.push(orderBy("price", sortOrder));
+                break;
+            case "rating":
+                constraints.push(orderBy("rating", sortOrder));
+                break;
+            case "createdAt":
+                constraints.push(orderBy("createdAt", "desc"));
+                break;
+            case "title":
+                constraints.push(orderBy("title", sortOrder));
+                break;
+            default:
+                break;
+        }
 
         if (last) {
             constraints.push(startAfter(last));
@@ -266,7 +284,7 @@ export const updateProductRating = async ({
         });
 
     });
-    
+
 };
 
 export const addOrUpdateReview = async (review: Review) => {

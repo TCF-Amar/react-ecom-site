@@ -4,9 +4,11 @@ export interface ProductState {
     loading: boolean;
     error: string | null;
     hasMore: boolean;
-    lastFetchedAt: number | null;
     searchQuery: string;
-    categoryId: number | null;
+    categoryId: number[] | null;
+    priceRange: [number, number] | null;
+    sortBy: "title" | "price" | "rating" | "createdAt";
+    sortOrder: "asc" | "desc";
 }
 
 export interface Category {
@@ -30,7 +32,7 @@ export interface Product {
     updatedAt: string;
     rating: number;
     reviewCount: number;
-    
+
 }
 
 export interface Review {
@@ -48,4 +50,3 @@ export interface Review {
     type?: "new" | "edited" | "deleted";
 
 }
-
