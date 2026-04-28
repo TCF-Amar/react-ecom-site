@@ -161,6 +161,11 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
     dispatch(clearCart());
     await clearCartAllItems(items, user!.uid);
   };
+  const totalPrice = items.reduce(
+    (total, item) => total + item.product.price * item.quantity,
+    0,
+  );
+  const subTotal = totalPrice + 100;
 
   return {
     dispatch,
@@ -183,5 +188,7 @@ export const useCart = ({ autoFetch = true }: { autoFetch?: boolean } = {}) => {
     cartClear,
     setTimeStart,
     cartClearCheckout,
+    totalPrice,
+    subTotal,
   };
 };

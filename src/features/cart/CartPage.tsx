@@ -3,23 +3,13 @@ import Breadcrumb from "../../shared/components/Breadcrumb";
 import { useCart } from "./useCart";
 import { useNavigate } from "react-router-dom";
 import CartProductCard from "./components/CartProductCard";
-import { useMemo } from "react";
 
-const SHIPPING_CHARGE = 100;
 function CartPage() {
   const navigate = useNavigate();
-  const { cartData, loading, cartClear } = useCart();
+  const { cartData, loading, cartClear , totalPrice,subTotal} = useCart();
 
-  const totalPrice = useMemo(
-    () =>
-      cartData.reduce(
-        (total, item) => total + item.product.price * item.quantity,
-        0,
-      ),
-    [cartData],
-  );
+  
 
-  const grandTotal = totalPrice + SHIPPING_CHARGE;
 
   // console.log(grand  Total);
 
@@ -95,7 +85,7 @@ function CartPage() {
               <div className="flex justify-between">
                 <p>Shipping</p>
                 <p className="font-medium text-slate-900">
-                  ${SHIPPING_CHARGE.toLocaleString()}
+                  ${100.0.toLocaleString()}
                 </p>
               </div>
             </div>
@@ -104,11 +94,11 @@ function CartPage() {
 
             <div className="flex justify-between text-lg font-bold text-slate-900 mb-8">
               <p>Total</p>
-              <p>${grandTotal.toLocaleString()}</p>
+              <p>${subTotal.toLocaleString()}</p>
             </div>
 
             <button
-              onClick={() => navigate("/checkout")}
+              onClick={() => navigate("/checkout", { state: { items: cartData, totalAmount: subTotal } })}
               className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 text-white rounded-xl font-semibold flex justify-center items-center"
             >
               Proceed to Checkout

@@ -174,13 +174,7 @@ function ProductDetail() {
                     Add To Cart
                   </button>
                 )}
-                <button
-                  type="button"
-                  // onClick={addToCartBtn}
-                  className="w-full md:min-w-50 bg-slate-100 text-slate-900 rounded-xl flex justify-center items-center py-4 font-semibold hover:bg-slate-200 transition-all duration-300"
-                >
-                  Buy Now for ${product?.price}
-                </button>
+               
               </div>
             </div>
             <div className="py-2">

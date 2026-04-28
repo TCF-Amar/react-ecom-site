@@ -119,9 +119,7 @@ export const fetchProductsFromFirestore = async (
         const snapshot = await getDocs(q);
 
         const products: Product[] = snapshot.docs.map(mapProduct);
-        console.log(products);
-        console.log(params);
-
+        
 
         return {
             products,
